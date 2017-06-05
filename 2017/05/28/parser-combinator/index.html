@@ -90,15 +90,16 @@
 
 
 
-<meta name="description" content="Why join the navy if you can be a pirate?">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Cherry Blessing">
-<meta property="og:url" content="https://blessingsoft.com/index.html">
+<meta name="description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 4 + 3 就是一个表达式语句，它由字符 4 空格 + 空格 和 3 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个函数来描述就是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Parser Combinator">
+<meta property="og:url" content="https://blessingsoft.com/2017/05/28/parser-combinator/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
-<meta property="og:description" content="Why join the navy if you can be a pirate?">
+<meta property="og:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 4 + 3 就是一个表达式语句，它由字符 4 空格 + 空格 和 3 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个函数来描述就是">
+<meta property="og:updated_time" content="2017-06-05T13:58:13.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Cherry Blessing">
-<meta name="twitter:description" content="Why join the navy if you can be a pirate?">
+<meta name="twitter:title" content="Parser Combinator">
+<meta name="twitter:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 4 + 3 就是一个表达式语句，它由字符 4 空格 + 空格 和 3 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个函数来描述就是">
 
 
 
@@ -126,13 +127,13 @@
 
 
 
-  <link rel="canonical" href="https://blessingsoft.com/"/>
+  <link rel="canonical" href="https://blessingsoft.com/2017/05/28/parser-combinator/"/>
 
 
 
 
 
-  <title>Cherry Blessing</title>
+  <title>Parser Combinator | Cherry Blessing</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -158,9 +159,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-   page-home 
- ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -243,9 +242,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -271,9 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/28/parser-combinator/" itemprop="url">Parser Combinator</a></h1>
+          <h1 class="post-title" itemprop="name headline">Parser Combinator</h1>
         
 
         <div class="post-meta">
@@ -320,9 +317,7 @@
       
 
       
-        
-          
-            <p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
+        <p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
 <h2 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h2><p>将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。</p>
 <p><code>4 + 3</code> 就是一个表达式语句，它由字符 <code>4</code> <code>空格</code> <code>+</code> <code>空格</code> 和 <code>3</code> 组成。我们可以将这个表达式解析成一种 <em>表达式树</em> (AST 的一种)。</p>
 <p>所以我们的解析器简单的用一个函数来描述就是：<br><code>func parser(_ string: String) -&gt; AST</code></p>
@@ -400,20 +395,27 @@
 <h3 id="Monad"><a href="#Monad" class="headerlink" title="Monad"></a>Monad</h3><p>从 Group 说起…</p>
 <h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://github.com/hlian/jiffy" target="_blank" rel="external">Jiffy</a><br><a href="https://news.realm.io/news/tryswift-yasuhiro-inami-parser-combinator/" target="_blank" rel="external">parser combinator</a><br><a href="http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf" target="_blank" rel="external">monparsing</a></p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <div>
+      
+        
+
       
     </div>
 
@@ -421,133 +423,38 @@
       
 
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2017/05/20/cherry-blessing/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Xspyhack">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Cherry Blessing">
-    </span>
-
-    
-      <header class="post-header">
-
         
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/20/cherry-blessing/" itemprop="url">Cherry Blessing</a></h1>
-        
+      
 
-        <div class="post-meta">
-          <span class="post-time">
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-20T12:37:36+08:00">
-                2017-05-20
-              </time>
+              <a href="/2017/05/20/cherry-blessing/" rel="next" title="Cherry Blessing">
+                <i class="fa fa-chevron-left"></i> Cherry Blessing
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p>Welcome to Cherry Blessing.</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -555,6 +462,10 @@
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -574,8 +485,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.gif"
@@ -619,6 +539,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser"><span class="nav-number">1.</span> <span class="nav-text">Parser</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combinator"><span class="nav-number">2.</span> <span class="nav-text">Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser-Combinator"><span class="nav-number">3.</span> <span class="nav-text">Parser Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Next"><span class="nav-number">4.</span> <span class="nav-text">Next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform"><span class="nav-number">5.</span> <span class="nav-text">Transform</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Functor"><span class="nav-number">5.1.</span> <span class="nav-text">Functor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative"><span class="nav-number">5.2.</span> <span class="nav-text">Applicative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Monad"><span class="nav-number">5.3.</span> <span class="nav-text">Monad</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">6.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -732,6 +668,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
 
   
 
