@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="functional programming,swift,group theory,category theory,semigroup,monoid,functor,applicative,monad," />
+  <meta name="keywords" content="group theory,category theory,semigroup,monoid,functor,applicative,monad,functional programming,swift," />
 
 
 
@@ -91,13 +91,13 @@
 
 
 <meta name="description" content="想理解函数式编程中的一些高大上的概念，比如 Functor, Monad 等，必须要先理解范畴论。 Group 群，是一种代数结构，由一个集合（G）以及一个二元运算符（·）所组成。wikipedia  一个群必须满足一些称为 群公理 的条件，也就是 封闭性、结合律、单位元 和 逆元。如整数配备上加法运算就形成一个群。  封闭性（Closure）：对于任意 a,b∈G，a·b∈G。 结合律（Asso">
-<meta name="keywords" content="functional programming,swift,group theory,category theory,semigroup,monoid,functor,applicative,monad">
+<meta name="keywords" content="group theory,category theory,semigroup,monoid,functor,applicative,monad,functional programming,swift">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Group Theory and Category Theory">
 <meta property="og:url" content="https://blessingsoft.com/2017/06/12/group-theory-and-category-theory/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
 <meta property="og:description" content="想理解函数式编程中的一些高大上的概念，比如 Functor, Monad 等，必须要先理解范畴论。 Group 群，是一种代数结构，由一个集合（G）以及一个二元运算符（·）所组成。wikipedia  一个群必须满足一些称为 群公理 的条件，也就是 封闭性、结合律、单位元 和 逆元。如整数配备上加法运算就形成一个群。  封闭性（Closure）：对于任意 a,b∈G，a·b∈G。 结合律（Asso">
-<meta property="og:updated_time" content="2017-06-12T14:59:27.000Z">
+<meta property="og:updated_time" content="2017-06-12T15:02:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Group Theory and Category Theory">
 <meta name="twitter:description" content="想理解函数式编程中的一些高大上的概念，比如 Functor, Monad 等，必须要先理解范畴论。 Group 群，是一种代数结构，由一个集合（G）以及一个二元运算符（·）所组成。wikipedia  一个群必须满足一些称为 群公理 的条件，也就是 封闭性、结合律、单位元 和 逆元。如整数配备上加法运算就形成一个群。  封闭性（Closure）：对于任意 a,b∈G，a·b∈G。 结合律（Asso">
@@ -347,16 +347,16 @@
 <p>一个群必须满足一些称为 <em>群公理</em> 的条件，也就是 <strong>封闭性</strong>、<strong>结合律</strong>、<strong>单位元</strong> 和 <strong>逆元</strong>。如整数配备上加法运算就形成一个群。</p>
 <ul>
 <li>封闭性（Closure）：对于任意 a,b∈G，a·b∈G。</li>
-<li>结合律（Associativity）：对于任意 a,b,c∈G，(a·b)·c == a·(b·c)。</li>
-<li>单位元（Identity）：G 中存在一个元素 e，使得任意 a∈G，a·e == e·a == a。</li>
-<li>逆元：对于任意 a∈G，存在 b∈G，使得 a·b == b·a == e。</li>
+<li>结合律（Associativity）：对于任意 a,b,c∈G，(a·b)·c = a·(b·c)。</li>
+<li>单位元（Identity）：G 中存在一个元素 e，使得任意 a∈G，a·e = e·a = a。</li>
+<li>逆元：对于任意 a∈G，存在 b∈G，使得 a·b = b·a = e。</li>
 </ul>
 <p>群并不要求这个二元运算符（·）具体做什么，它只要求这个二元运算符存在，所以很多数学结构都是群。比如我们可以把整数当作一个群，把 <code>+</code> 作为二元运算符。</p>
 <ul>
 <li>封闭性：对于任意两个整数 a,b，a+b 依然是一个整数。</li>
-<li>结合律：对于任意整数 a,b,c，(a+b)+c == a+(b+c)。</li>
-<li>单位元：存在元素 0，使得 a+0 == 0+a == a。</li>
-<li>逆元：对于任意整数 a，当 b=-a 时，a+b == b+a == e。</li>
+<li>结合律：对于任意整数 a,b,c，(a+b)+c = a+(b+c)。</li>
+<li>单位元：存在元素 0，使得 a+0 = 0+a = a。</li>
+<li>逆元：对于任意整数 a，当 b=-a 时，a+b = b+a = e。</li>
 </ul>
 <p>所以我们可以说 (整数, +) 是一个群。如果把 <code>*</code> 当作二元运算符，把 <code>1</code> 作为单位元的时候，整数就形成了另一个群。</p>
 <p>除了整数，还有很多数学结构是群。</p>
@@ -467,10 +467,6 @@
       
         <div class="post-tags">
           
-            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
-          
-            <a href="/tags/swift/" rel="tag"># swift</a>
-          
             <a href="/tags/group-theory/" rel="tag"># group theory</a>
           
             <a href="/tags/category-theory/" rel="tag"># category theory</a>
@@ -484,6 +480,10 @@
             <a href="/tags/applicative/" rel="tag"># applicative</a>
           
             <a href="/tags/monad/" rel="tag"># monad</a>
+          
+            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
           
         </div>
       
