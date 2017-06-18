@@ -362,7 +362,7 @@
 <li>单位元：存在元素 0，使得 a+0 = 0+a = a。</li>
 <li>逆元：对于任意整数 a，当 b=-a 时，a+b = b+a = e。</li>
 </ul>
-<p>所以我们可以说 (整数, +) 是一个群。如果把 <code>*</code> 当作二元运算符，把 <code>1</code> 作为单位元的时候，整数就形成了另一个群。</p>
+<p>所以我们可以说 <code>(整数, +)</code> 是一个群。如果把 <code>*</code> 当作二元运算符，把 <code>1</code> 作为单位元的时候，整数就形成了另一个群。</p>
 <p>除了整数，还有很多数学结构是群。</p>
 <h3 id="Semigroup"><a href="#Semigroup" class="headerlink" title="Semigroup"></a>Semigroup</h3><p>满足封闭性和结合律的群，称为半群（semigroup）。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">infix</span> <span class="keyword">operator</span> &lt;&gt;: <span class="type">AdditionPrecedence</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Semigroup</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> &lt;&gt;<span class="params">(lhs: <span class="keyword">Self</span>, rhs: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Self</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Int</span>: <span class="title">Semigroup</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> &lt;&gt;<span class="params">(lhs: Int, rhs: Int)</span></span> -&gt; <span class="type">Int</span> &#123;</div><div class="line">        <span class="keyword">return</span> lhs + rhs</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Array</span>: <span class="title">Semigroup</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> &lt;&gt;<span class="params">(lhs: Array, rhs: Array)</span></span> -&gt; <span class="type">Array</span> &#123;</div><div class="line">        <span class="keyword">return</span> lhs + rhs</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 折叠 fold</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">concat</span>&lt;S: Semigroup&gt;<span class="params">(<span class="number">_</span> xs: [S], <span class="number">_</span> initial: S)</span></span> -&gt; <span class="type">S</span> &#123;</div><div class="line">    <span class="keyword">return</span> xs.<span class="built_in">reduce</span>(initial, &lt;&gt;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -372,7 +372,7 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Monoid</span>: <span class="title">Semigroup</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="keyword">var</span> e: <span class="type">Self</span> &#123; <span class="keyword">get</span> &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Int</span>: <span class="title">Monoid</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="keyword">var</span> e = <span class="number">0</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Array</span>: <span class="title">Monoid</span> </span>&#123;</div><div class="line">    <span class="keyword">static</span> <span class="keyword">var</span> e: <span class="type">Array</span> &#123;</div><div class="line">        <span class="keyword">return</span> []</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">concat</span>&lt;M: Monoid&gt;<span class="params">(<span class="number">_</span> xs: [M])</span></span> -&gt; <span class="type">M</span> &#123;</div><div class="line">    <span class="keyword">return</span> xs.<span class="built_in">reduce</span>(<span class="type">M</span>.e, &lt;&gt;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>concat</code> 是对 Monoid 的一种应用，它可以利用 Monoid 的定义（ 二元操作 <code>&lt;&gt;</code> 和 单位元 <code>e</code> ）进行折叠操作。</p>
 <h2 id="Category-Theory"><a href="#Category-Theory" class="headerlink" title="Category Theory"></a>Category Theory</h2><blockquote>
-<p>范畴论是数学的一门学科，以抽象的方法来处理数学概念，将这些概念形式化成一组组的“物件”及“态射”。<a href="https://zh.wikipedia.org/wiki/范畴论" target="_blank" rel="external">范畴论</a></p>
+<p>范畴论是数学的一门学科，以抽象的方法来处理数学概念，将这些概念形式化成一组组的“物件”及“态射”。<a href="https://zh.wikipedia.org/wiki/范畴论" target="_blank" rel="external">wikipedia</a></p>
 </blockquote>
 <h3 id="Category"><a href="#Category" class="headerlink" title="Category"></a>Category</h3><p>一个范畴 C 包括：</p>
 <ul>
@@ -407,33 +407,34 @@
 <li>对任何态射 f: x-&gt;y, g: y-&gt;z，恒有 F(f·g) = F(f)·F(g)。</li>
 </ul>
 <p>换言之，函子会保持单位态射与态射的复合。<br>一个由一范畴映射至其自身的函子称之为 <strong>自函子（Endofunctor）</strong>。</p>
-<h4 id="可以把范畴当作一组类型的集合"><a href="#可以把范畴当作一组类型的集合" class="headerlink" title="可以把范畴当作一组类型的集合"></a>可以把范畴当作一组类型的集合</h4><p>如范畴 C 有 Int 类型和 String 类型对象，以及 Int -&gt; String 的态射；范畴 D 有 Array<int> 类型和 Array<string> 类型对象，以及 Array<int> -&gt; Array<string> 的态射。两个范畴之间的映射 F：</string></int></string></int></p>
+<h4 id="可以把范畴当作一组类型的集合"><a href="#可以把范畴当作一组类型的集合" class="headerlink" title="可以把范畴当作一组类型的集合"></a>可以把范畴当作一组类型的集合</h4><p>如范畴 C 有 <code>Int</code> 类型和 <code>String</code> 类型对象，以及 <code>Int -&gt; String</code> 的态射；范畴 D 有 <code>Array&lt;Int&gt;</code> 类型和 <code>Array&lt;String&gt;</code> 类型对象，以及 <code>Array&lt;Int&gt; -&gt; Array&lt;String&gt;</code> 的态射。两个范畴之间的映射 F：</p>
 <ul>
-<li>Int 映射至 Array<int> 上，String 映射至 Array<string> 上。</string></int></li>
-<li>态射 Int -&gt; String 映射至 Array<int> -&gt; Array<string> 上。</string></int></li>
+<li><code>Int</code> 映射至 <code>Array&lt;Int&gt;</code> 上，<code>String</code> 映射至 <code>Array&lt;String&gt;</code> 上。</li>
+<li>态射 <code>Int -&gt; String</code> 映射至 <code>Array&lt;Int&gt; -&gt; Array&lt;String&gt;</code> 上。</li>
 </ul>
-<p>翻译成代码：C: Int, String, f: Int -&gt; String, D: Array<int>, Array<string>, f: Array<int> -&gt; Array<string>。</string></int></string></int></p>
+<p>翻译成代码：C: <code>Int</code>, <code>String</code>, f: <code>Int -&gt; String</code>, D: <code>Array&lt;Int&gt;</code>, <code>Array&lt;String&gt;</code>, f: <code>Array&lt;Int&gt; -&gt; Array&lt;String&gt;</code>。</p>
 <ul>
-<li>x: Int -&gt; F(x): Array<int>，String -&gt; F(x): Array<string></string></int></li>
-<li>f: (Int -&gt; String) -&gt; F(f): (Array<int> -&gt; Array<string>)</string></int></li>
+<li>x: <code>Int</code> -&gt; F(x): <code>Array&lt;Int&gt;</code>，<code>String</code> -&gt; F(x): <code>Array&lt;String&gt;</code></li>
+<li>f: <code>(Int -&gt; String)</code> -&gt; F(f): <code>(Array&lt;Int&gt; -&gt; Array&lt;String&gt;)</code></li>
 </ul>
 <p>范畴是不涉及具体类型的，所以用泛型表示：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">tmap</span>&lt;T&gt;<span class="params">(x: T)</span></span> -&gt; <span class="type">F</span>&lt;<span class="type">T</span>&gt;</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">fmap</span>&lt;A, B&gt;<span class="params">(f: A -&gt; B)</span></span> -&gt; (<span class="type">F</span>&lt;<span class="type">A</span>&gt; -&gt; <span class="type">F</span>&lt;<span class="type">B</span>&gt;)</div></pre></td></tr></table></figure>
 <p>简化一下变成：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 将 tmap 和 fmap 合并</span></div><div class="line"><span class="comment">// 由于 fmap 实际上是 (F&lt;A&gt;, A -&gt; B) -&gt; F&lt;B&gt; 的 curry 版本，</span></div><div class="line"><span class="comment">// 所以两者是等价的。</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">map</span>&lt;A, B&gt;<span class="params">(x: F&lt;A&gt;, f: A -&gt; B)</span></span> -&gt; <span class="type">F</span>&lt;<span class="type">B</span>&gt;</div></pre></td></tr></table></figure>
-<p>在来看看 Swift 中的 <code>Array</code> 和 <code>Optional</code>。如果把 Swift 中所有的类型 <code>A, B</code> 当作对象，以及 Swift 中所有的函数当作态射 <code>A -&gt; B</code>，那么这些类型和函数就组成一个范畴 A。把 Array 类型当作对象 <code>Array&lt;A&gt;, Array&lt;B&gt;</code>，Array 上所有的函数当作态射 <code>Array&lt;A&gt; -&gt; Array&lt;B&gt;</code>，那么也组成一个范畴 B。而 A 到 B 之间的函子是 Array，因为函子 Array 能将任意类型 <code>T</code> 转换为 <code>Array&lt;T&gt;</code>。<code>Optional</code> 同理。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Swift 中把 Int 映射到 Array&lt;Int&gt; 由 Array 的初始化方法提供，</span></div><div class="line"><span class="comment">// 所以可以不写。</span></div><div class="line"><span class="comment">// 由于 fmap 实际上是 (F&lt;A&gt;, A -&gt; B) -&gt; F&lt;B&gt; 的 curry 版本，</span></div><div class="line"><span class="comment">// 所以两者是等价的。</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">map</span>&lt;A, B&gt;<span class="params">(x: F&lt;A&gt;, f: A -&gt; B)</span></span> -&gt; <span class="type">F</span>&lt;<span class="type">B</span>&gt;</div></pre></td></tr></table></figure>
+<p>在来看看 Swift 中的 <code>Array</code> 和 <code>Optional</code>。如果把 Swift 中所有的类型 <code>A, B</code> 当作对象，以及 Swift 中所有的函数当作态射 <code>A -&gt; B</code>，那么这些类型和函数就组成一个范畴 A。把 <code>Array</code> 类型当作对象 <code>Array&lt;A&gt;, Array&lt;B&gt;</code>，<code>Array</code> 上所有的函数当作态射 <code>Array&lt;A&gt; -&gt; Array&lt;B&gt;</code>，那么也组成一个范畴 B。而 A 到 B 之间的函子是 <code>Array</code>，因为函子 <code>Array</code> 能将任意类型 <code>T</code> 转换为 <code>Array&lt;T&gt;</code>。<code>Optional</code> 同理。</p>
 <p>很多库对 <code>Functor</code> 的支持直接在类型构造器（Type Constructor）的定义中实现 <code>map</code> 方法，比如 Swift 中的 <code>Array</code> 和 <code>Optional</code> 就是需要一个泛型作为参数来构建具体类型的类型构造器，它在定义中实现了 <code>map</code> 方法。这些类型构造器相当于同时具备了类型和函数的映射。在 Haskell 里把这个行为称为 <code>Lift</code>，相当于把类型和函数放到容器里面。所以一个带有 <code>map</code> 方法的类型构造器就是一个函子。</p>
-<p>范畴与高阶类型：如果忽略范畴中的态射，范畴其实就是对特定类型的抽象，即高阶类型（类型构造器）。对于范畴 D，它的所有类型都是 Array<t> 的特定类型。而对于范畴 C，可以看作是一个 Identity 类型的构造器（id[T] = T）。</t></p>
-<p>注意⚠️：函子不是容器，函子不是容器，函子不是容器。</p>
-<p>如 <code>typealias Parser&lt;A&gt; = (String) -&gt; (A, String)?</code> 我们可以实现 <code>func map&lt;A, B&gt;(x: Parser&lt;A&gt;, f: (A) -&gt; B) -&gt; Parser&lt;B&gt;</code> 函数，所以我们可以说 <code>Parser&lt;A&gt;</code> 是一个函子，但它不是容器。</p>
-<h3 id="Endofunctor"><a href="#Endofunctor" class="headerlink" title="Endofunctor"></a>Endofunctor</h3><p>A functor that maps a category to itself。一个由一范畴映射至其自身的函子称之为 <strong>自函子（Endofunctor）</strong>。</p>
-<p>先看自函数的概念：将一个类型映射到自身类型，如 Int -&gt; Int。</p>
+<p>范畴与高阶类型：如果忽略范畴中的态射，范畴其实就是对特定类型的抽象，即高阶类型（类型构造器）。对于范畴 D，它的所有类型都是 <code>Array&lt;T&gt;</code> 的特定类型。而对于范畴 C，可以看作是一个 Identity 类型的构造器（id[T] = T）。</p>
+<p>注意⚠️：函子不是容器，函子不是容器，函子不是容器。<br>如 <code>typealias Parser&lt;A&gt; = (String) -&gt; (A, String)?</code> 我们可以实现 <code>func map&lt;A, B&gt;(x: Parser&lt;A&gt;, f: (A) -&gt; B) -&gt; Parser&lt;B&gt;</code> 函数，所以我们可以说 <code>Parser&lt;A&gt;</code> 是一个函子，但它不是容器。</p>
+<h3 id="Endofunctor"><a href="#Endofunctor" class="headerlink" title="Endofunctor"></a>Endofunctor</h3><blockquote>
+<p>A functor that maps a category to itself。一个由一范畴映射至其自身的函子称之为 <strong>自函子（Endofunctor）</strong>。</p>
+</blockquote>
+<p>先看自函数的概念：将一个类型映射到自身类型，如 <code>Int -&gt; Int</code>。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">(x: Int)</span></span> -&gt; <span class="type">Int</span> &#123; <span class="keyword">return</span> x + <span class="number">1</span> &#125;</div></pre></td></tr></table></figure>
 <p>单位函数（Identity Function）的概念：什么都不做，传入什么就返回什么。属于自函数的特例。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">id</span><span class="params">(x: Int)</span></span> -&gt; <span class="type">Int</span> &#123; <span class="keyword">return</span> x &#125;</div></pre></td></tr></table></figure>
-<p><strong>自函子不是单位函子（Identity Functor）</strong>。还是上面的范畴 C，为了区分自函子和单位函子，多加一种态射 g: String-&gt;Int，那么：</p>
-<p>自函子：对于函子 F，对于 F[Int] 结果是 String，F[String] 结果是 Int，对于 F[f: Int -&gt; String] 结果是 g: String -&gt; Int。那么这个函子就是自函子。</p>
-<p>单位函子（Identity Functor）：对于函子 F，对于 F[Int] 结果还是 Int，对于 F[String] 结果还是 String，对于 F[f: Int -&gt; String] 结果还是 f: Int -&gt; String，对于 F[g: String -&gt; Int] 结果还是 g: String -&gt; Int。那么这个函子就是单位函子。 </p>
+<p><strong>自函子不是单位函子（Identity Functor）</strong>。还是上面的范畴 C，为了区分自函子和单位函子，多加一种态射 g: <code>String -&gt; Int</code>，那么：</p>
+<p>自函子：对于函子 F，对于 <code>F(Int)</code> 结果是 <code>String</code>，<code>F(String)</code> 结果是 <code>Int</code>，对于 <code>F(f: Int -&gt; String)</code> 结果是 g: <code>String -&gt; Int</code>。那么这个函子就是自函子。</p>
+<p>单位函子（Identity Functor）：对于函子 F，对于 <code>F(Int)</code> 结果还是 <code>Int</code>，对于 <code>F(String)</code> 结果还是 <code>String</code>，对于 <code>F(f: Int -&gt; String)</code> 结果还是 <code>f: Int -&gt; String</code>，对于 <code>F(g: String -&gt; Int)</code> 结果还是 g: <code>String -&gt; Int</code>。那么这个函子就是单位函子。 </p>
 <h2 id="Applicative"><a href="#Applicative" class="headerlink" title="Applicative"></a>Applicative</h2><p>虽然在 Haskell 中 Monad 是 Applicative 的一种，但是 Applicative 的出现却在 Monad 之后。</p>
 <p><code>func pure&lt;T&gt;(x: T) -&gt; F&lt;T&gt;</code></p>
 <p>未完待续</p>
@@ -441,6 +442,15 @@
 <p>A monad is a monoid in the category of endofunctors – Philip Wadler</p>
 </blockquote>
 <p>（自函子说穿了就是把一个范畴映射到自身的函子，自函子范畴说穿了就是从小范畴映射到自身的函子所构成的以自函子为对象以自然变换为态射 的范畴，幺半群说穿了就是只有单个对象的范畴，给定了一个幺半群则可构造出一个仅有单个对象的小范畴使其态射由幺半群的元素给出而合成由幺半群的运算给 出，而单子说穿了就是自函子范畴上的这样一个幺半群。（这都不理解么亲连这种最基本的概念都不理解还学什么编程！）</p>
+<ul>
+<li>X 上的自函子：T：X -&gt; X</li>
+<li>单位自函子 id[X] 到函子 T 的自然转换：id[X] -&gt; T</li>
+<li><p>函子 T 的张量积 T⊗T 到函子 T 的自然转换：T⊗T -&gt; T</p>
+</li>
+<li><p><code>func pure&lt;T&gt;(x: T) -&gt; F&lt;T&gt;</code></p>
+</li>
+</ul>
+<p>此处函子的张量积 ⊗ 可以看作为组合（Composition）<br>注意结合 Monoidal Category 理解；注意里面的 Monoid 与抽象代数中 Monoid 的区别。</p>
 <p>未完待续</p>
 
           
