@@ -522,7 +522,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/28/parser-combinator/" itemprop="url">Parser Combinator</a></h1>
+                <a class="post-title-link" href="/2017/05/28/parser-combinator/" itemprop="url">未命名</a></h1>
         
 
         <div class="post-meta">
@@ -544,28 +544,6 @@
             
           </span>
 
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/functional-programming/" itemprop="url" rel="index">
-                    <span itemprop="name">functional programming</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -593,7 +571,7 @@
       
         
           
-            <p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
+            <h1 id="Parser-Combinator"><a href="#Parser-Combinator" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h1><p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
 <h2 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h2><p>将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。</p>
 <p><code>( 4 + 3  )</code> 就是一个表达式语句，它由字符 <code>(</code>  <code>4</code> <code>空格</code> <code>+</code> <code>3</code> 和 <code>)</code> 组成。我们可以将这个表达式解析成一种 <em>表达式树</em> (AST 的一种)。</p>
 <p>所以我们的解析器简单的用一个函数来描述就是：<br><code>func parser(_ string: String) -&gt; AST</code></p>
@@ -607,7 +585,7 @@
 <p>One of the distinguishing features of functional programming is the widespread use of combinators to construct programs. <em>A combinator is a function which builds program fragments from program fragments</em>; in a sense the programmer using combinators constructs much of the desired program automatically, rather that writing every detail by hand. – John Hughes</p>
 </blockquote>
 <p>其实 Combinator 很容易理解，就像字面意思那样 —— 组合子。首先定义一系列原子操作，然后定义组合的规则，然后根据组合的规则把这些原子操作组合起来。</p>
-<h2 id="Parser-Combinator"><a href="#Parser-Combinator" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h2><p>回到开头的话：<em>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</em> 所以我们需要重新定义一下我们的解析器，把它变成一个解析组合子。</p>
+<h2 id="Parser-Combinator-1"><a href="#Parser-Combinator-1" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h2><p>回到开头的话：<em>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</em> 所以我们需要重新定义一下我们的解析器，把它变成一个解析组合子。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Parser</span>&lt;<span class="title">A</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">let</span> parse: (<span class="type">String</span>) -&gt; (<span class="type">A</span>, <span class="type">String</span>)?</div><div class="line">    <span class="comment">// (input) -&gt; (result, remaining)</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>这是一个解析字符串的解析器，我们把这个函数放到一个结构体 <code>Parser</code> 中，作为一个 <code>parse</code> 变量。当然我们也可以用类型别名 <code>typealias Parser&lt;Result&gt; = (String) -&gt; (Result, String)?</code>。</p>
 <p>当然解析组合子不仅仅能解析字符串，所以可以用泛型来把它变得更通用。</p>
@@ -626,7 +604,7 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">isSpace</span><span class="params">(<span class="number">_</span> character: Character)</span></span> -&gt; <span class="type">Bool</span> &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">String</span>(character).trimmingCharacters(<span class="keyword">in</span>: .whitespacesAndNewlines).isEmpty</div><div class="line">&#125;</div><div class="line">(satisfy(isSpace)).parse(<span class="string">" abc"</span>)</div></pre></td></tr></table></figure>
 <p>所以我们只需要给 <code>satisfy</code> 函数传入一个是否属于 X 的函数，就可以得到一个能够解析 x 的解析器。</p>
 <h2 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h2><p>最基本的 <code>character</code> 有了，<code>digit</code> 有了，当我们需要解析一个字符串 <code>alex</code> 的时候，我们只需要把 <code>alex</code> 看成 <code>a</code> <code>l</code> <code>e</code> <code>x</code> 4 个字符，然后不断的用 <code>character</code> 进行解析，最后把每一步返回的结果合并起来就行了。考虑到解析一个字符串是一个基本功能，为了不用每次写重复的代码，把它封装成用来解析 <code>string</code> 的解析器。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</div><div class="line">    <span class="keyword">let</span> parsers = str.characters.<span class="built_in">map</span> &#123; character($<span class="number">0</span>) &#125;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">var</span> results: [<span class="type">Character</span>] = []</div><div class="line">        <span class="keyword">var</span> stream = input</div><div class="line">        <span class="keyword">for</span> parser <span class="keyword">in</span> parsers &#123;</div><div class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = parser.parse(stream) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">            &#125;</div><div class="line">            results.append(result)</div><div class="line">			    stream = remainder</div><div class="line">        &#125;</div><div class="line">			<span class="keyword">return</span> (<span class="type">String</span>(results), stream)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</div><div class="line">    <span class="keyword">let</span> parsers = str.characters.<span class="built_in">map</span> &#123; character($<span class="number">0</span>) &#125;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">var</span> results: [<span class="type">Character</span>] = []</div><div class="line">        <span class="keyword">var</span> stream = input</div><div class="line">        <span class="keyword">for</span> parser <span class="keyword">in</span> parsers &#123;</div><div class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = parser.parse(stream) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">            &#125;</div><div class="line">            results.append(result)</div><div class="line">            stream = remainder</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> (<span class="type">String</span>(results), stream)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>观察 parse 函数类型 <code>(String) -&gt; (A, String)</code>，解析成功的返回值是解析结果和 <strong>剩余</strong> 的字符串，所以解析 <code>alex</code> 的时候：</p>
 <ol>
 <li>“alex”: ‘a’ -&gt; (‘a’, “lex”)</li>
@@ -718,7 +696,10 @@
 <p><a href="http://blessingsoft.com/2017/06/12/group-theory-and-category-theory/">Group Theory and Category Theory</a></p>
 <h3 id="Alternative"><a href="#Alternative" class="headerlink" title="Alternative"></a>Alternative</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">empty</span>&lt;A&gt;<span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; <span class="number">_</span> <span class="keyword">in</span> <span class="literal">nil</span> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">choice</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">return</span> x.parse(input) ?? y.parse(input)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://github.com/hlian/jiffy" target="_blank" rel="external">Jiffy</a><br><a href="https://news.realm.io/news/tryswift-yasuhiro-inami-parser-combinator/" target="_blank" rel="external">parser combinator</a><br><a href="http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf" target="_blank" rel="external">m</a></p>
+<h3 id="Applicative-amp-Monad"><a href="#Applicative-amp-Monad" class="headerlink" title="Applicative &amp; Monad"></a>Applicative &amp; Monad</h3><p>Applicative 和 Monad 的区别在于：</p>
+<p>Applicative 的两个 parser 是相互独立的，组合后的新 parser 是可以静态分析其行为的。而对于 Monad，在不知道输入的情况下，是不能确定其行为，也就是说 Monad 是依赖于计算结果。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">alex</span><span class="params">(<span class="number">_</span> x: Parser&lt;String&gt;)</span></span> -&gt; <span class="type">Bool</span> &#123;</div><div class="line">    <span class="keyword">if</span> <span class="keyword">let</span> (<span class="number">_</span>, <span class="number">_</span>) = x.parse(<span class="string">"alex.huo"</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="literal">true</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> af: <span class="type">Parser</span>&lt;(<span class="type">String</span>) -&gt; <span class="type">String</span>&gt; = pure(id)</div><div class="line"><span class="keyword">let</span> ax = string(<span class="string">"alex"</span>)</div><div class="line">alex(af &lt;*&gt; ax) <span class="comment">// true</span></div><div class="line"></div><div class="line"><span class="keyword">let</span> mf: (<span class="type">String</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; = &#123; string($<span class="number">0</span>) &#125;</div><div class="line"><span class="keyword">let</span> mx = string(<span class="string">"alex"</span>)</div><div class="line">alex(mx &gt;&gt;- mf) <span class="comment">// false</span></div></pre></td></tr></table></figure>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://github.com/hlian/jiffy" target="_blank" rel="external">Jiffy</a><br><a href="https://news.realm.io/news/tryswift-yasuhiro-inami-parser-combinator/" target="_blank" rel="external">Parser combinators</a><br><a href="http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf" target="_blank" rel="external">Monadic Parser Combinators</a></p>
 
           
         
@@ -932,7 +913,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
