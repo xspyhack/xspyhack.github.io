@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="parser,parser combinator,monad,functional programming,swift," />
 
 
 
@@ -90,16 +90,17 @@
 
 
 
-<meta name="description" content="Parser Combinator解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种">
+<meta name="description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
+<meta name="keywords" content="parser,parser combinator,monad,functional programming,swift">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Cherry Blessing">
+<meta property="og:title" content="Parser Combinator">
 <meta property="og:url" content="https://blessingsoft.com/2017/05/28/parser-combinator/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
-<meta property="og:description" content="Parser Combinator解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种">
-<meta property="og:updated_time" content="2017-07-02T05:58:48.000Z">
+<meta property="og:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
+<meta property="og:updated_time" content="2017-08-06T09:40:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Cherry Blessing">
-<meta name="twitter:description" content="Parser Combinator解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种">
+<meta name="twitter:title" content="Parser Combinator">
+<meta name="twitter:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
 
 
 
@@ -133,7 +134,7 @@
 
 
 
-  <title> | Cherry Blessing</title>
+  <title>Parser Combinator | Cherry Blessing</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -270,7 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">Parser Combinator</h1>
         
 
         <div class="post-meta">
@@ -292,6 +293,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/functional-programming/" itemprop="url" rel="index">
+                    <span itemprop="name">functional programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -317,7 +340,7 @@
       
 
       
-        <h1 id="Parser-Combinator"><a href="#Parser-Combinator" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h1><p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
+        <p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
 <h2 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h2><p>将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。</p>
 <p><code>( 4 + 3  )</code> 就是一个表达式语句，它由字符 <code>(</code>  <code>4</code> <code>空格</code> <code>+</code> <code>3</code> 和 <code>)</code> 组成。我们可以将这个表达式解析成一种 <em>表达式树</em> (AST 的一种)。</p>
 <p>所以我们的解析器简单的用一个函数来描述就是：<br><code>func parser(_ string: String) -&gt; AST</code></p>
@@ -331,7 +354,7 @@
 <p>One of the distinguishing features of functional programming is the widespread use of combinators to construct programs. <em>A combinator is a function which builds program fragments from program fragments</em>; in a sense the programmer using combinators constructs much of the desired program automatically, rather that writing every detail by hand. – John Hughes</p>
 </blockquote>
 <p>其实 Combinator 很容易理解，就像字面意思那样 —— 组合子。首先定义一系列原子操作，然后定义组合的规则，然后根据组合的规则把这些原子操作组合起来。</p>
-<h2 id="Parser-Combinator-1"><a href="#Parser-Combinator-1" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h2><p>回到开头的话：<em>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</em> 所以我们需要重新定义一下我们的解析器，把它变成一个解析组合子。</p>
+<h2 id="Parser-Combinator"><a href="#Parser-Combinator" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h2><p>回到开头的话：<em>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</em> 所以我们需要重新定义一下我们的解析器，把它变成一个解析组合子。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Parser</span>&lt;<span class="title">A</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">let</span> parse: (<span class="type">String</span>) -&gt; (<span class="type">A</span>, <span class="type">String</span>)?</div><div class="line">    <span class="comment">// (input) -&gt; (result, remaining)</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>这是一个解析字符串的解析器，我们把这个函数放到一个结构体 <code>Parser</code> 中，作为一个 <code>parse</code> 变量。当然我们也可以用类型别名 <code>typealias Parser&lt;Result&gt; = (String) -&gt; (Result, String)?</code>。</p>
 <p>当然解析组合子不仅仅能解析字符串，所以可以用泛型来把它变得更通用。</p>
@@ -438,10 +461,19 @@
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/// 吃掉左边的结果</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">left</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">discarding</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> a: A, <span class="number">_</span> b: B)</span></span> -&gt; <span class="type">A</span> &#123;</div><div class="line">        <span class="keyword">return</span> b</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result1, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result2, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> (discarding(result1, result2), remainder2)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>然后这个函数并没有卵用。</p>
 <h3 id="Monad"><a href="#Monad" class="headerlink" title="Monad"></a>Monad</h3><p>观看 <code>map</code> 函数 <code>func map&lt;A, B&gt;(_ x: Parser&lt;A&gt;, _ f: (A) -&gt; B) -&gt; Parser&lt;B&gt;</code></p>
-<p>它要求传入两个参数，一个是 <code>Parser&lt;A&gt;</code>，一个是函数 <code>A -&gt; B</code>，第二个参数对标题中的 <strong>Combinator</strong> 并不是很友好，<strong>Parser Combinator</strong> 的思想是组合一系列的 <code>Parser</code> 得到结果。</p>
+<p>它要求传入两个参数，一个是 <code>Parser&lt;A&gt;</code>，一个是函数 <code>A -&gt; B</code>，第二个参数对标题中的 <strong>Combinator</strong> 并不是很友好，<strong>Parser Combinator</strong> 的思想是组合一系列的 <code>Parser</code> 得到结果。上面定义了有很多小的 parser，比如 <code>func string(_ str: String) -&gt; Parser&lt;String&gt;</code>，函数签名是 <code>(String) -&gt; Parser&lt;String&gt;</code>，由于 <code>map</code> 函数的第二个参数的签名是 <code>(A) -&gt; B</code>，而非 <code>(A) -&gt; Parser&lt;B&gt;</code>，所以假如存在一个与 <code>map</code> 功能相似，但第二个参数的签名是 <code>(A) -&gt; Parser&lt;B&gt;</code>，则能够使得之前定义的很多小的 <code>parser</code> 能够直接作为一个参数，直接得到一个新类型的 <code>Parser</code>，大概这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">flatMap</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> f: <span class="params">(A)</span></span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;</div></pre></td></tr></table></figure>
+<p>使用的时候：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> parser = flatMap(stringParser, string(<span class="string">"alex"</span>))</div></pre></td></tr></table></figure>
+<p>具体实现与 <code>map</code> 也很像：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">flatMap</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> f: @escaping <span class="params">(A)</span></span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = x.parse(input)<span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> f(result).parse(remainder)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><a href="http://blessingsoft.com/2017/06/12/group-theory-and-category-theory/">Group Theory and Category Theory</a></p>
 <h3 id="Alternative"><a href="#Alternative" class="headerlink" title="Alternative"></a>Alternative</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">empty</span>&lt;A&gt;<span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; <span class="number">_</span> <span class="keyword">in</span> <span class="literal">nil</span> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">choice</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></div><div class="line">        <span class="keyword">return</span> x.parse(input) ?? y.parse(input)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Alternative 类似于 <code>Swift Standard Library</code> 中定义的运算符 <code>??</code>，它有两个同类型的参数，第一个参数是偏爱的 <code>parser</code>，第二个参数是默认的 <code>parser</code>。它首先尝试使用第一个 <code>parser</code> 来进行解析，如果成功，则返回。如果不成功，则使用默认的 <code>parser</code> 进行解析。它的返回值类型也是同类型的 <code>Parser</code>。</p>
+<p>作用是假如有 Int, String, Bool 三个类型的 <code>parser</code>，而一个 scalar 类型的 <code>parser</code> 只要能够解析 Int, String, Bool 任意一种类型，则算解析成功。换句话说就是 scalar 是 Int, String, Bool 的父集。一种简单的从 <code>Parser&lt;Int&gt;</code>, <code>Parser&lt;String&gt;</code>, <code>Parser&lt;Bool&gt;</code> 三种已有实现的 parser 得到 <code>Parser&lt;Scalar&gt;</code> 的方法是逐个进行 parse，如果成功则马上返回。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> scalar = parserInt &lt;|&gt; parserString &lt;|&gt; parserBool</div></pre></td></tr></table></figure>
+<p>从这个例子看有点 one of 的意思，但实际上更加准确的说法是 choice。</p>
 <h3 id="Applicative-amp-Monad"><a href="#Applicative-amp-Monad" class="headerlink" title="Applicative &amp; Monad"></a>Applicative &amp; Monad</h3><p>Applicative 和 Monad 的区别在于：</p>
 <p>Applicative 的两个 parser 是相互独立的，组合后的新 parser 是可以静态分析其行为的。而对于 Monad，在不知道输入的情况下，是不能确定其行为，也就是说 Monad 是依赖于计算结果。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">alex</span><span class="params">(<span class="number">_</span> x: Parser&lt;String&gt;)</span></span> -&gt; <span class="type">Bool</span> &#123;</div><div class="line">    <span class="keyword">if</span> <span class="keyword">let</span> (<span class="number">_</span>, <span class="number">_</span>) = x.parse(<span class="string">"alex.huo"</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="literal">true</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> af: <span class="type">Parser</span>&lt;(<span class="type">String</span>) -&gt; <span class="type">String</span>&gt; = pure(id)</div><div class="line"><span class="keyword">let</span> ax = string(<span class="string">"alex"</span>)</div><div class="line">alex(af &lt;*&gt; ax) <span class="comment">// true</span></div><div class="line"></div><div class="line"><span class="keyword">let</span> mf: (<span class="type">String</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; = &#123; string($<span class="number">0</span>) &#125;</div><div class="line"><span class="keyword">let</span> mx = string(<span class="string">"alex"</span>)</div><div class="line">alex(mx &gt;&gt;- mf) <span class="comment">// false</span></div></pre></td></tr></table></figure>
@@ -472,6 +504,20 @@
     </div>
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/parser/" rel="tag"># parser</a>
+          
+            <a href="/tags/parser-combinator/" rel="tag"># parser combinator</a>
+          
+            <a href="/tags/monad/" rel="tag"># monad</a>
+          
+            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+        </div>
       
 
       
@@ -588,7 +634,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -623,7 +669,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Parser-Combinator"><span class="nav-number">1.</span> <span class="nav-text">Parser Combinator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser"><span class="nav-number">1.1.</span> <span class="nav-text">Parser</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combinator"><span class="nav-number">1.2.</span> <span class="nav-text">Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser-Combinator-1"><span class="nav-number">1.3.</span> <span class="nav-text">Parser Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Next"><span class="nav-number">1.4.</span> <span class="nav-text">Next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combine"><span class="nav-number">1.5.</span> <span class="nav-text">Combine</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Many"><span class="nav-number">1.5.0.1.</span> <span class="nav-text">Many</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Skip"><span class="nav-number">1.5.0.2.</span> <span class="nav-text">Skip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Many1"><span class="nav-number">1.5.0.3.</span> <span class="nav-text">Many1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zip"><span class="nav-number">1.5.0.4.</span> <span class="nav-text">Zip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Choice"><span class="nav-number">1.5.0.5.</span> <span class="nav-text">Choice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform"><span class="nav-number">1.6.</span> <span class="nav-text">Transform</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Functor"><span class="nav-number">1.6.1.</span> <span class="nav-text">Functor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative"><span class="nav-number">1.6.2.</span> <span class="nav-text">Applicative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Monad"><span class="nav-number">1.6.3.</span> <span class="nav-text">Monad</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Alternative"><span class="nav-number">1.6.4.</span> <span class="nav-text">Alternative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative-amp-Monad"><span class="nav-number">1.6.5.</span> <span class="nav-text">Applicative & Monad</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">1.7.</span> <span class="nav-text">Ref</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser"><span class="nav-number">1.</span> <span class="nav-text">Parser</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combinator"><span class="nav-number">2.</span> <span class="nav-text">Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser-Combinator"><span class="nav-number">3.</span> <span class="nav-text">Parser Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Next"><span class="nav-number">4.</span> <span class="nav-text">Next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combine"><span class="nav-number">5.</span> <span class="nav-text">Combine</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Many"><span class="nav-number">5.0.1.</span> <span class="nav-text">Many</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Skip"><span class="nav-number">5.0.2.</span> <span class="nav-text">Skip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Many1"><span class="nav-number">5.0.3.</span> <span class="nav-text">Many1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zip"><span class="nav-number">5.0.4.</span> <span class="nav-text">Zip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Choice"><span class="nav-number">5.0.5.</span> <span class="nav-text">Choice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform"><span class="nav-number">6.</span> <span class="nav-text">Transform</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Functor"><span class="nav-number">6.1.</span> <span class="nav-text">Functor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative"><span class="nav-number">6.2.</span> <span class="nav-text">Applicative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Monad"><span class="nav-number">6.3.</span> <span class="nav-text">Monad</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Alternative"><span class="nav-number">6.4.</span> <span class="nav-text">Alternative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative-amp-Monad"><span class="nav-number">6.5.</span> <span class="nav-text">Applicative & Monad</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">7.</span> <span class="nav-text">Ref</span></a></li></ol></div>
             
 
           </div>
