@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="monad,functional programming,swift,plist parser,parser,parser combinator," />
+  <meta name="keywords" content="plist parser,parser,parser combinator,monad,functional programming,swift," />
 
 
 
@@ -91,13 +91,13 @@
 
 
 <meta name="description" content="Plist 是 Apple 家平台上一种很常见的配置文件，常见的存储格式是常见的 XML 格式（还有 Binary 格式），不同于 HTML 的复杂，Plist 只包含了比较少的几种标签（tag），所以实现使用 functional 的 parser combinator 来实现一个简单的 plist parser 也是一件很有意思的事情。 Plist一个 Plist 文件内容长这个样子： 123">
-<meta name="keywords" content="monad,functional programming,swift,plist parser,parser,parser combinator">
+<meta name="keywords" content="plist parser,parser,parser combinator,monad,functional programming,swift">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Plist Parser">
 <meta property="og:url" content="https://blessingsoft.com/2017/08/10/plist-parser/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
 <meta property="og:description" content="Plist 是 Apple 家平台上一种很常见的配置文件，常见的存储格式是常见的 XML 格式（还有 Binary 格式），不同于 HTML 的复杂，Plist 只包含了比较少的几种标签（tag），所以实现使用 functional 的 parser combinator 来实现一个简单的 plist parser 也是一件很有意思的事情。 Plist一个 Plist 文件内容长这个样子： 123">
-<meta property="og:updated_time" content="2017-08-10T14:41:22.000Z">
+<meta property="og:updated_time" content="2017-08-10T14:44:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Plist Parser">
 <meta name="twitter:description" content="Plist 是 Apple 家平台上一种很常见的配置文件，常见的存储格式是常见的 XML 格式（还有 Binary 格式），不同于 HTML 的复杂，Plist 只包含了比较少的几种标签（tag），所以实现使用 functional 的 parser combinator 来实现一个简单的 plist parser 也是一件很有意思的事情。 Plist一个 Plist 文件内容长这个样子： 123">
@@ -357,42 +357,42 @@
 <tr>
 <td style="text-align:left">NSString</td>
 <td style="text-align:left">CFString</td>
-<td style="text-align:left">\<string\></string\></td>
+<td style="text-align:left"><string></string></td>
 <td style="text-align:left">UTF-8 编码的字符串</td>
 </tr>
 <tr>
 <td style="text-align:left">NSNumber</td>
 <td style="text-align:left">CFNumber</td>
-<td style="text-align:left">\<real\>, \<integer\></integer\></real\></td>
+<td style="text-align:left"><real>, <integer></integer></real></td>
 <td style="text-align:left">十进制数字符串</td>
 </tr>
 <tr>
 <td style="text-align:left">NSNumber</td>
-<td style="text-align:left">CFBoolean    \<true \="">, or \<false \=""></false></true></td>
+<td style="text-align:left">CFBoolean    <true>, or <false></false></true></td>
 <td style="text-align:left">无数据（只有标签）</td>
 </tr>
 <tr>
 <td style="text-align:left">NSDate</td>
 <td style="text-align:left">CFDate</td>
-<td style="text-align:left">\<date\></date\></td>
+<td style="text-align:left"><date></date></td>
 <td style="text-align:left">ISO 8601 格式的日期字符串</td>
 </tr>
 <tr>
 <td style="text-align:left">NSData</td>
 <td style="text-align:left">CFData</td>
-<td style="text-align:left">\<data\></data\></td>
+<td style="text-align:left"><data></data></td>
 <td style="text-align:left">Base64 编码的数据</td>
 </tr>
 <tr>
 <td style="text-align:left">NSArray</td>
 <td style="text-align:left">CFArray</td>
-<td style="text-align:left">\<array\></array\></td>
+<td style="text-align:left"><array></array></td>
 <td style="text-align:left">可以包含任意数量的子元素</td>
 </tr>
 <tr>
 <td style="text-align:left">NSDictionary</td>
 <td style="text-align:left">CFDictionary</td>
-<td style="text-align:left">\<dict\></dict\></td>
+<td style="text-align:left"><dict></dict></td>
 <td style="text-align:left">交替包含 <key> 标签和 plist 元素标签</key></td>
 </tr>
 </tbody>
@@ -465,17 +465,17 @@
       
         <div class="post-tags">
           
-            <a href="/tags/monad/" rel="tag"># monad</a>
-          
-            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
-          
-            <a href="/tags/swift/" rel="tag"># swift</a>
-          
             <a href="/tags/plist-parser/" rel="tag"># plist parser</a>
           
             <a href="/tags/parser/" rel="tag"># parser</a>
           
             <a href="/tags/parser-combinator/" rel="tag"># parser combinator</a>
+          
+            <a href="/tags/monad/" rel="tag"># monad</a>
+          
+            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
           
         </div>
       
