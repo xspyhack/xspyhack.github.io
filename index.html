@@ -254,6 +254,235 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2017/08/10/plist-parser/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/10/plist-parser/" itemprop="url">Parser Combinator</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-10T22:38:54+08:00">
+                2017-08-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/functional-programming/" itemprop="url" rel="index">
+                    <span itemprop="name">functional programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Plist 是 Apple 家平台上一种很常见的配置文件，常见的存储格式是常见的 XML 格式（还有 Binary 格式），不同于 HTML 的复杂，Plist 只包含了比较少的几种标签（tag），所以实现使用 functional 的 parser combinator 来实现一个简单的 plist parser 也是一件很有意思的事情。</p>
+<h2 id="Plist"><a href="#Plist" class="headerlink" title="Plist"></a>Plist</h2><p>一个 Plist 文件内容长这个样子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">&lt;dict&gt;</div><div class="line">    &lt;key&gt;number&lt;/key&gt;</div><div class="line">    &lt;integer&gt;0&lt;/integer&gt;</div><div class="line">    &lt;key&gt;date&lt;/key&gt;</div><div class="line">    &lt;date&gt;2017-08-05T14:25:14Z&lt;/date&gt;</div><div class="line">    &lt;key&gt;data&lt;/key&gt;</div><div class="line">    &lt;data&gt;VGVzdFZhbHVl&lt;/data&gt;</div><div class="line">    &lt;key&gt;boolean&lt;/key&gt;</div><div class="line">    &lt;true/&gt;</div><div class="line">    &lt;key&gt;array&lt;/key&gt;</div><div class="line">    &lt;array&gt;</div><div class="line">        &lt;string&gt;string&lt;/string&gt;</div><div class="line">        &lt;false/&gt;</div><div class="line">        &lt;integer&gt;0&lt;/integer&gt;</div><div class="line">    &lt;/array&gt;</div><div class="line"> &lt;/dict&gt;</div></pre></td></tr></table></figure>
+<p><a href="">wikipedia</a> 上列出了一个详细的 <code>XML</code> 标签和 macOS/iOS 中的类型关系以及存储格式。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Foundation 类</th>
+<th style="text-align:left">Core Foundation 类型</th>
+<th style="text-align:left">XML 标签</th>
+<th style="text-align:left">储存格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">NSString</td>
+<td style="text-align:left">CFString</td>
+<td style="text-align:left">\<string\></string\></td>
+<td style="text-align:left">UTF-8 编码的字符串</td>
+</tr>
+<tr>
+<td style="text-align:left">NSNumber</td>
+<td style="text-align:left">CFNumber</td>
+<td style="text-align:left">\<real\>, \<integer\></integer\></real\></td>
+<td style="text-align:left">十进制数字符串</td>
+</tr>
+<tr>
+<td style="text-align:left">NSNumber</td>
+<td style="text-align:left">CFBoolean    \<true \="">, or \<false \=""></false></true></td>
+<td style="text-align:left">无数据（只有标签）</td>
+</tr>
+<tr>
+<td style="text-align:left">NSDate</td>
+<td style="text-align:left">CFDate</td>
+<td style="text-align:left">\<date\></date\></td>
+<td style="text-align:left">ISO 8601 格式的日期字符串</td>
+</tr>
+<tr>
+<td style="text-align:left">NSData</td>
+<td style="text-align:left">CFData</td>
+<td style="text-align:left">\<data\></data\></td>
+<td style="text-align:left">Base64 编码的数据</td>
+</tr>
+<tr>
+<td style="text-align:left">NSArray</td>
+<td style="text-align:left">CFArray</td>
+<td style="text-align:left">\<array\></array\></td>
+<td style="text-align:left">可以包含任意数量的子元素</td>
+</tr>
+<tr>
+<td style="text-align:left">NSDictionary</td>
+<td style="text-align:left">CFDictionary</td>
+<td style="text-align:left">\<dict\></dict\></td>
+<td style="text-align:left">交替包含 <key> 标签和 plist 元素标签</key></td>
+</tr>
+</tbody>
+</table>
+<p>根据这个表格，我们可以定义出 Plist 的数据结构。</p>
+<h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/// The plist data model</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">PLIST</span> </span>&#123;</div><div class="line">    <span class="comment">/// &lt;true /&gt; or &lt;false /&gt;</span></div><div class="line">    <span class="keyword">case</span> bool(<span class="type">Bool</span>)</div><div class="line">    </div><div class="line">    <span class="comment">/// 2017-08-05T14:25:14Z</span></div><div class="line">    <span class="keyword">case</span> date(<span class="type">Date</span>)</div><div class="line">    </div><div class="line">    <span class="comment">/// &lt;data&gt;VGVzdFZhbHVl&lt;/data&gt; (&lt;54657374 56616c75 65&gt;</span></div><div class="line">    <span class="keyword">case</span> data(<span class="type">Data</span>)</div><div class="line">    </div><div class="line">    <span class="comment">/// &lt;integer&gt;233&lt;/integer&gt; or &lt;real&gt;2.33&lt;/real&gt;</span></div><div class="line">    <span class="keyword">case</span> number(<span class="type">Int</span>)</div><div class="line">    </div><div class="line">    <span class="comment">/// &lt;string&gt;string&lt;/string&gt;</span></div><div class="line">    <span class="keyword">case</span> string(<span class="type">String</span>)</div><div class="line">    </div><div class="line">    <span class="comment">/// &lt;array&gt;&lt;string&gt;The String&lt;/string&gt;&lt;/array&gt;</span></div><div class="line">    <span class="keyword">indirect</span> <span class="keyword">case</span> array([<span class="type">PLIST</span>])</div><div class="line">    </div><div class="line">    <span class="comment">/// &lt;dict&gt;&lt;key&gt;The Key&lt;/key&gt;&lt;string&gt;The String&lt;/string&gt;&lt;/dict&gt;</span></div><div class="line">    <span class="keyword">indirect</span> <span class="keyword">case</span> dict([<span class="type">String</span>: <span class="type">PLIST</span>])</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h2><p>根据 Plist data model，想要解析一个 Plist 字符串 得到 <code>PLIST</code> 类型，只需要一个 <code>parser</code>。</p>
+<p>没错，只需要一个 parser，这个 parser 大概长这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> parser: <span class="type">Parser</span>&lt;<span class="type">PLIST</span>&gt;</div><div class="line"><span class="keyword">let</span> result = parser.parse(<span class="string">"plist"</span>)</div></pre></td></tr></table></figure>
+<p>这个 <code>let parser: Parser&lt;PLIST&gt;</code> 的实现才是最关键的。一个 <code>PLIST</code> 是由 <code>Bool</code> <code>Date</code> <code>Data</code> <code>Number</code> <code>String</code> 5 种简单的类型和 <code>Array&lt;PLIST&gt;</code> <code>Dictionary&lt;PLIST&gt;</code> 2 种容器（nested）类型组成，所以一个 <code>Parser&lt;PLIST&gt;</code> 也是由对应的 <code>Parser&lt;Bool&gt;</code> <code>Parser&lt;Date&gt;</code> <code>Parser&lt;Data&gt;</code> <code>Parser&lt;Number&gt;</code> <code>Parser&lt;String&gt;</code> 5 中简单的 parser 和 <code>Parser&lt;Array&gt;</code> <code>Parser&lt;Dictionary&gt;</code> 2 种容器类型 parser 组成。</p>
+<h3 id="Bool-Parser"><a href="#Bool-Parser" class="headerlink" title="Bool Parser"></a>Bool Parser</h3><p>在 Plist 中，Bool 类型由两种形式 <code>&lt;true/&gt;</code> 和 <code>&lt;false/&gt;</code>，所以一个 Bool 类型的 parser 也就是能够解析字符串 <code>&lt;true/&gt;</code> 和 <code>&lt;false/&gt;</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _true = string(<span class="string">"&lt;true/&gt;"</span>) &lt;&amp;&gt; const(<span class="type">PLIST</span>.bool(<span class="literal">true</span>))</div><div class="line"><span class="keyword">let</span> _false = string(<span class="string">"&lt;false/&gt;"</span>) &lt;&amp;&gt; const(<span class="type">PLIST</span>.bool(<span class="literal">false</span>))</div><div class="line"></div><div class="line"><span class="keyword">let</span> _bool = _true &lt;|&gt; _false</div><div class="line">_bool.parse(<span class="string">"&lt;false/&gt;"</span>)</div></pre></td></tr></table></figure>
+<h3 id="Date-Parser"><a href="#Date-Parser" class="headerlink" title="Date Parser"></a>Date Parser</h3><p>Plist 中的 Date 类型存储的是 UTC 字符串，如 <code>&lt;date&gt;2017-08-05T14:25:14Z&lt;/date&gt;</code>。字符串中的开始标签 <code>&lt;date&gt;</code> 和结束标签 <code>&lt;/date&gt;</code> 对于解析的结果来说是没有用的，所以一个 Date 类型的 parser 是要将这个字符串解析成 <code>PLIST.date(date)</code>, date 为 2017-08-05T14:25:14Z 通过 format 得到。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _date = string(<span class="string">"&lt;date&gt;"</span>) *&gt; manyTill(_any, string(<span class="string">"&lt;/date&gt;"</span>)) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.date(<span class="type">String</span>($<span class="number">0</span>).date!) &#125;</div><div class="line">_date.parse(<span class="string">"&lt;date&gt;2017-08-05T14:25:14Z&lt;/date&gt;"</span>)</div><div class="line"></div><div class="line"><span class="comment">/// UTC Date</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">extension</span> <span class="title">String</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">var</span> date: <span class="type">Date</span>? &#123;</div><div class="line">        <span class="keyword">let</span> formatter = <span class="type">DateFormatter</span>()</div><div class="line">        formatter.dateFormat = <span class="string">"yyyy-MM-dd'T'HH:mm:ss'Z'"</span></div><div class="line">        <span class="keyword">return</span> formatter.date(from: <span class="keyword">self</span>)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Data-Parser"><a href="#Data-Parser" class="headerlink" title="Data Parser"></a>Data Parser</h3><p>Plist 中的 Data 类型存储的是 Base64 编码后的数据，所以实现一个 Data Parser 和 Date Parser 差不多，区别是 tag 和 Data 类型初始化。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _data = string(<span class="string">"&lt;data&gt;"</span>) *&gt; manyTill(_any, string(<span class="string">"&lt;/data&gt;"</span>)) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.data(<span class="type">Data</span>(base64Encoded: <span class="type">String</span>($<span class="number">0</span>))!) &#125;</div><div class="line"><span class="keyword">let</span> dataString = _data.parse(<span class="string">"&lt;data&gt;VGVzdFZhbHVl&lt;/data&gt;"</span>)</div></pre></td></tr></table></figure>
+<h3 id="Number-Parser"><a href="#Number-Parser" class="headerlink" title="Number Parser"></a>Number Parser</h3><p>Plist 中的 Number 的存储实际上分两种。一种是整型，一种是浮点型。整型的 <code>tag</code> 是 <code>integer</code>，浮点型是 <code>real</code>。</p>
+<p>先看 Integer Parser：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _integer = string(<span class="string">"&lt;integer&gt;"</span>) *&gt; manyTill(_digit, string(<span class="string">"&lt;/integer&gt;"</span>)) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.number(<span class="type">Int</span>(<span class="type">String</span>($<span class="number">0</span>))!) &#125;</div></pre></td></tr></table></figure>
+<h3 id="String-Parser"><a href="#String-Parser" class="headerlink" title="String Parser"></a>String Parser</h3><p>String Parser 和 Date Parser 以及 Data Parser 对比起来更简单，实际上就是去掉了最后转换的那一步。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _string = string(<span class="string">"&lt;string&gt;"</span>) *&gt; manyTill(_any, string(<span class="string">"&lt;/string&gt;"</span>)) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.string(<span class="type">String</span>($<span class="number">0</span>)) &#125;</div><div class="line">_string.parse(<span class="string">"&lt;string&gt;The String&lt;/string&gt;"</span>)</div></pre></td></tr></table></figure>
+<h3 id="Tag-Parser"><a href="#Tag-Parser" class="headerlink" title="Tag Parser"></a>Tag Parser</h3><p>通过对比上面几种除了 Bool Parser 之外不同类型的 Parser，可以发现实现的方式很相似。</p>
+<ul>
+<li>closed tag，成对存在。</li>
+<li>中间存储的都是字符串，最后把字符串转为具体类型。</li>
+</ul>
+<p>把这些相似的 Parser 进行抽象，将相同部分封装成一个函数，不同的部分用传参的形式来实现。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">tag</span>&lt;A&gt;<span class="params">(<span class="number">_</span> tag: String, <span class="number">_</span> p: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">A</span>]&gt; &#123;</div><div class="line">    <span class="keyword">return</span> string(<span class="string">"&lt;<span class="subst">\(tag)</span>&gt;"</span>) *&gt; manyTill(p, string(<span class="string">"&lt;/<span class="subst">\(tag)</span>&gt;"</span>))</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> _date1 = tag(<span class="string">"&lt;date&gt;"</span>, _any) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.date(<span class="type">String</span>($<span class="number">0</span>).date!) &#125;</div><div class="line">_date1.parse(<span class="string">"&lt;date&gt;2017-08-05T14:25:14Z&lt;/date&gt;"</span>)</div><div class="line"></div><div class="line"><span class="keyword">let</span> _string1 = tag(<span class="string">"string"</span>, _any) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.string(<span class="type">String</span>($<span class="number">0</span>)) &#125;</div><div class="line">_string1.parse(<span class="string">"&lt;string&gt;The String&lt;/string&gt;"</span>)</div></pre></td></tr></table></figure>
+<h3 id="Array-Parser"><a href="#Array-Parser" class="headerlink" title="Array Parser"></a>Array Parser</h3><p>Array Parser 和 Dictionary Parser 相对比较复杂，因为它们是容器类型，里面可以是任意的 PLIST 类型，包括它们本身。对于 Enum PLIST 来说，可以使用 <code>indirect</code> 关键字来表示这种情况，但是在定义 parser 的时候，确没有这些魔法。</p>
+<p>但是通过利用 Swift 的一些特性，还是很容易解决这个递归的问题。先忽略 Dictionary 类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _plist = plist()</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">plist</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">PLIST</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> _bool &lt;|&gt; _string &lt;|&gt; _integer &lt;|&gt; _date &lt;|&gt; _data &lt;|&gt; _array</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> _array = tag(<span class="string">"array"</span>, _plist) &lt;&amp;&gt; &#123;</div><div class="line">    <span class="type">PLIST</span>.array($<span class="number">0</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Dictionary-Parser"><a href="#Dictionary-Parser" class="headerlink" title="Dictionary Parser"></a>Dictionary Parser</h3><p>Dictionary Parser 的递归问题和 Array Parser 一样。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _plist = plist()</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">plist</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">PLIST</span>&gt; &#123;</div><div class="line">    <span class="keyword">return</span> _bool &lt;|&gt; _string &lt;|&gt; _integer &lt;|&gt; _date &lt;|&gt; _data &lt;|&gt; _array &lt;|&gt; _dict</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> _dict = tag(<span class="string">"dict"</span>, ?) &lt;&amp;&gt; &#123;</div><div class="line">   <span class="comment">/// 转换为 PLIST.dict</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>但 Dictionary 和 Array 不一样的地方在于，Array 里面是多个 Plist 的元素，而 Dictionary 是 key-value 对，且必须是 key-value 对，也就是 <code>tag(&quot;dict&quot;, _keyValue)</code>。</p>
+<p>先实现一个 Key-Value Parser：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _key = string(<span class="string">"&lt;key&gt;"</span>) *&gt; manyTill(_any, string(<span class="string">"&lt;/key&gt;"</span>)) &lt;&amp;&gt; &#123; <span class="type">String</span>($<span class="number">0</span>) &#125;</div><div class="line"><span class="keyword">let</span> _keyValue = (&#123; a <span class="keyword">in</span> &#123; b <span class="keyword">in</span> (a, b) &#125;&#125; &lt;^&gt; _key &lt;*&gt; (value))</div></pre></td></tr></table></figure>
+<p>然后就可以得到 Dictionary Parser：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _dict = tag(<span class="string">"dict"</span>, _keyValue) &lt;&amp;&gt; &#123; <span class="type">PLIST</span>.dict(atod($<span class="number">0</span>)) &#125;</div><div class="line"><span class="comment">/// Tuple Array to Dictionary</span></div><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">atod</span>&lt;Key: Hashable, Value&gt;<span class="params">(<span class="number">_</span> tuples: [<span class="params">(Key, Value)</span></span></span>]) -&gt; [<span class="type">Key</span>: <span class="type">Value</span>] &#123;</div><div class="line">    <span class="keyword">var</span> dict: [<span class="type">Key</span>: <span class="type">Value</span>] = [:]</div><div class="line">    <span class="keyword">for</span> (key, value) <span class="keyword">in</span> tuples &#123;</div><div class="line">        dict[key] = value</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> dict</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>或者换一种写法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _kv = _keyValue &lt;&amp;&gt; &#123; ttod($<span class="number">0</span>) &#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> _dict1 = tag(<span class="string">"dict"</span>, _kv) &lt;&amp;&gt; &#123;</div><div class="line">    <span class="type">PLIST</span>.dict(</div><div class="line">    		$<span class="number">0</span>.flatMap &#123; $<span class="number">0</span> &#125;</div><div class="line">        .<span class="built_in">reduce</span>([<span class="type">String</span>: <span class="type">PLIST</span>]()) &#123; d, kv <span class="keyword">in</span></div><div class="line">            <span class="keyword">var</span> dict = d</div><div class="line">            dict.updateValue(kv.value, forKey: kv.key)</div><div class="line">            <span class="keyword">return</span> dict</div><div class="line">        &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">ttod</span>&lt;Key: Hashable, Value&gt;<span class="params">(<span class="number">_</span> tuple: <span class="params">(Key, Value)</span></span></span>) -&gt; [<span class="type">Key</span>: <span class="type">Value</span>] &#123;</div><div class="line">    <span class="keyword">return</span> [tuple.<span class="number">0</span>: tuple.<span class="number">1</span>]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Plist-Parser"><a href="#Plist-Parser" class="headerlink" title="Plist Parser"></a>Plist Parser</h3><p>最后</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> _plist = _bool &lt;|&gt; _string &lt;|&gt; _integer &lt;|&gt; _date &lt;|&gt; _data &lt;|&gt; _array &lt;|&gt; _dict</div><div class="line"></div><div class="line"><span class="keyword">let</span> result = _plist.parse(plist)</div><div class="line"><span class="built_in">dump</span>(result)</div></pre></td></tr></table></figure>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://zh.wikipedia.org/zh-hans/属性列表" target="_blank" rel="external">属性列表</a><br><a href="http://blessingsoft.com/2017/05/28/parser-combinator/">Parser Combinator</a><br><a href="https://github.com/nixzhu/dev-blog/blob/master/2017-04-12-json-parser.md" target="_blank" rel="external">解析组合子</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2017/06/12/group-theory-and-category-theory/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -922,7 +1151,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -944,7 +1173,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
