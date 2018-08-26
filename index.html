@@ -487,20 +487,20 @@
 <li><strong>NSLog</strong>: Foundation 中的实现，除了能在 Xcode Console 中输出外，还会往 Console.app 发，并且有较大的性能损害。</li>
 <li><strong>os_log</strong>: 待补充 <a href="https://developer.apple.com/videos/play/wwdc2016/721/" target="_blank" rel="external">Unified Logging and Activity Tracing - WWDC 2016 - Videos - Apple Developer</a> <a href="https://developer.apple.com/videos/play/wwdc2018/405/" target="_blank" rel="external">Measuring Performance Using Logging - WWDC 2018 - Videos - Apple Developer</a></li>
 </ul>
-<p>Xcode Console 和 Apple System Logs 都是需要物理接触设备才能看到 Log。但是在项目中，如果想要看到线上用户的 Log 信息，必须要把这些 Log 写到本地文件中，或者实时/定时发到远端服务器上。这时候直接使用内置的 API 是无法满足需求的。</p>
+<p>Xcode Console 和 Apple System Logs 都是需要物理接触设备才能看到 log。但是在项目中，如果想要看到线上用户的 log 信息，必须要把这些 log 写到本地文件中，或者实时/定时发到远端服务器上。这时候直接使用内置的 API 是无法满足需求的。</p>
 <p>对于一个相对比较合理的日志系统，一般有几点要求：</p>
 <ul>
 <li>在 release 下禁止输出日志到 Xcode Console</li>
 <li><del>在 release 下</del> 禁止输出日志到 Apple System Logs</li>
 <li>提供输出日志到本地文件中的能力</li>
-<li>能够方便的扩展，直接输出到 Web</li>
+<li>能够方便的扩展，如直接输出到 Web</li>
 <li>对于日志根据重要性划分为不同的等级</li>
 <li>可以根据日志等级，过滤日志</li>
 </ul>
 <h2 id="Design"><a href="#Design" class="headerlink" title="Design"></a>Design</h2><h3 id="Level"><a href="#Level" class="headerlink" title="Level"></a>Level</h3><p>Level 有两个作用：</p>
 <ul>
 <li>定义一条日志的重要性</li>
-<li>对日志进行过滤，比如过滤掉某个等级一下的日志（实际是有包含的关系</li>
+<li>对日志进行过滤，比如过滤掉某个等级以下的日志（实际是有包含的关系</li>
 </ul>
 <p>这里通过两个类型来实现 level 的作用。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Level</span>: <span class="title">Int</span> </span>&#123;</div><div class="line">    <span class="keyword">case</span> off = <span class="number">0</span></div><div class="line">    <span class="keyword">case</span> error = <span class="number">1</span> <span class="comment">// Flag.error | Level.off</span></div><div class="line">    <span class="keyword">case</span> warning = <span class="number">3</span> <span class="comment">// Flag.warning | Level.error</span></div><div class="line">    <span class="keyword">case</span> info = <span class="number">7</span> <span class="comment">// Flag.info | Level.warning</span></div><div class="line">    <span class="keyword">case</span> debug = <span class="number">15</span> <span class="comment">// Flag.debug | Level.info</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">Flag</span>: <span class="title">OptionSet</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">let</span> rawValue: <span class="type">Int</span></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> error = <span class="type">Flag</span>(rawValue: <span class="number">1</span> &lt;&lt; <span class="number">0</span>) <span class="comment">// 1</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> warning = <span class="type">Flag</span>(rawValue: <span class="number">1</span> &lt;&lt; <span class="number">1</span>) <span class="comment">// 2</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> info = <span class="type">Flag</span>(rawValue: <span class="number">1</span> &lt;&lt; <span class="number">2</span>) <span class="comment">// 4</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> debug = <span class="type">Flag</span>(rawValue: <span class="number">1</span> &lt;&lt; <span class="number">3</span>) <span class="comment">// 8</span></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(rawValue: <span class="type">Int</span>) &#123;</div><div class="line">        <span class="keyword">self</span>.rawValue = rawValue</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -517,8 +517,9 @@
 <p>两种不同的实现，体现的是两种不同的思想：</p>
 <ul>
 <li>一种是使用面向对象的思想，通过一个基类来提供相同的接口，然后子类重写这些接口来提供不同的能力；</li>
-<li>另一种是使用面向协议的思想，通过一个协议来对接口进行约束，每一个具体的实现都必须实现这些接口来提供不同都能力。而对于不同类型的 logger 都共有的行为，前一种方式可以直接在基类中实现，后一种方式可以通过 <code>protocol extension</code> 来提供默认实现。</li>
+<li>另一种是使用面向协议的思想，通过一个协议来对接口进行约束，每一个具体的实现都必须实现这些接口来提供不同都能力。</li>
 </ul>
+<p>而对于不同类型的 logger 都共有的行为，前一种方式可以直接在基类中实现，后一种方式可以通过 <code>protocol extension</code> 来提供默认实现。</p>
 <p>两种方式各有优缺点，如果你也不喜欢前一种 <strong>需要运行时才能知道子类必须重写父类的某个方法</strong>，完全不能体现出 Swift 作为一门有着强大类型安全的静态语言的优势，那么这里毫不犹豫的选择后一种方式。（不解释</p>
 <p>对于这里的 <code>Type</code>，虽然使用 <code>enum</code> 有着很好的强类型信息，但这样写有着很大的约束，就是一开始就必须定义好所有的 Type，对于扩展性来说，非常不友好。</p>
 <p>所以综合可扩展性和 <code>Type</code> 的作用考虑，这里通过添加一个 <code>String</code> 类型的属性 <code>name</code> 来简单的区分。（很方便于 debug</p>
