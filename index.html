@@ -538,7 +538,7 @@
 <p>一个思考，上面的 <code>log</code> 函数中参数 message 的类型为什么使用 <code>@autoclosure</code>？</p>
 <p>第二个思考，<code>Swift.print</code> 函数的定义你知道吗？</p>
 </blockquote>
-<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p><a href="https://github.com/xspyhack/Logger" target="_blank" rel="external">GitHub - xspyhack/Logger: A lightweight logging library written in Swift.</a></p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p><a href="https://github.com/xspyhack/Keldeo" target="_blank" rel="external">GitHub - xspyhack/Keldeo: A lightweight logging library written in Swift.</a></p>
 <h3 id="Why-AnyLogger"><a href="#Why-AnyLogger" class="headerlink" title="Why AnyLogger"></a>Why AnyLogger</h3><p>对于引入 <code>AnyLogger</code>，是因为我希望能够提供移除一个 <code>logger</code> 的能力，用处就是当我在脱离 Xcode 的时候，可以通过一种可以输出到浏览器的 <code>logger</code> 来实时看到日志输出。而这个名为 <code>WebLogger</code> 的 <code>logger</code> 平时并不会用到，所以它是需要的时候才添加进去，用完之后便移除，所以就涉及到 <code>logger</code> 必须实现 <code>Equatable</code>，实现从 <code>loggers</code> 里面移除它。</p>
 <blockquote>
 <p>Why <code>protocol Logging: Equatable {}</code> needs <code>AnyLogger</code>？见另一篇 <a href="http://blessingsoft.com/2018/08/26/pats/">PATs</a></p>
