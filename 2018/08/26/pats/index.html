@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="swift,functional programming," />
+  <meta name="keywords" content="swift,type erasure,type erased,pats,protocol,generic," />
 
 
 
@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="待续">
-<meta name="keywords" content="swift,functional programming">
+<meta name="description" content="很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Oriented Programming首先 Swift 是一个 支持 面向协议编程思想的语言，并且 Standard Library 也是大量使用这种思想来实现很多的特性。（这里删掉介绍 POP 以及对应优缺点的几千字 先看看用">
+<meta name="keywords" content="swift,type erasure,type erased,pats,protocol,generic">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PATs">
 <meta property="og:url" content="https://blessingsoft.com/2018/08/26/pats/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
-<meta property="og:description" content="待续">
-<meta property="og:updated_time" content="2018-08-25T18:00:55.634Z">
+<meta property="og:description" content="很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Oriented Programming首先 Swift 是一个 支持 面向协议编程思想的语言，并且 Standard Library 也是大量使用这种思想来实现很多的特性。（这里删掉介绍 POP 以及对应优缺点的几千字 先看看用">
+<meta property="og:updated_time" content="2018-08-29T14:48:33.365Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PATs">
-<meta name="twitter:description" content="待续">
+<meta name="twitter:description" content="很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Oriented Programming首先 Swift 是一个 支持 面向协议编程思想的语言，并且 Standard Library 也是大量使用这种思想来实现很多的特性。（这里删掉介绍 POP 以及对应优缺点的几千字 先看看用">
 
 
 
@@ -340,7 +340,91 @@
       
 
       
-        <p>待续</p>
+        <blockquote>
+<p>很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types</p>
+</blockquote>
+<h2 id="Protocol-Oriented-Programming"><a href="#Protocol-Oriented-Programming" class="headerlink" title="Protocol-Oriented Programming"></a>Protocol-Oriented Programming</h2><p>首先 Swift 是一个 <strong>支持</strong> 面向协议编程思想的语言，并且 <a href="https://github.com/apple/swift" target="_blank" rel="external">Standard Library</a> 也是大量使用这种思想来实现很多的特性。（这里删掉介绍 POP 以及对应优缺点的几千字</p>
+<p>先看看用 POP 的思想，来实现一个 Cache：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span> </span>&#123;</div><div class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123; <span class="keyword">get</span> &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MemoryCache</span>: <span class="title">Caching</span> </span>&#123;</div><div class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="string">"Memory Cache"</span></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DiskCache</span>: <span class="title">Caching</span> </span>&#123;</div><div class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="string">"Disk Cache"</span></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> memory: <span class="type">Caching</span> = <span class="type">MemoryCache</span>() <span class="comment">// 🙂️</span></div><div class="line"><span class="keyword">let</span> disk: <span class="type">Caching</span> = <span class="type">DiskCache</span>() <span class="comment">// 🙂️</span></div><div class="line"><span class="keyword">let</span> caches: [<span class="type">Caching</span>] = [memory, disk] <span class="comment">// 🙂️</span></div></pre></td></tr></table></figure>
+<p>到这里，一切都是很熟悉的样子，也能正常的 work，类似这样的<strong>用一个 <em>protocol</em> 来进行接口（行为）约束</strong>的代码估计写的也不少。</p>
+<h2 id="Generics"><a href="#Generics" class="headerlink" title="Generics"></a>Generics</h2><blockquote>
+<p>作为一个现代语言，泛型是必须支持的。作为一个现代程序员，泛型也是必须会使用的。</p>
+</blockquote>
+<p>Cache  是用来缓存数据的，但有很多数据类型都适合被缓存，比如一张图片，一个视频等等。如果希望不同类型的数据有不同的缓存策略，使用的时候也能直接获取某一种类型的缓存，不需要各种 <code>as? XXX</code>，立马想到的就是泛型。</p>
+<p>泛型还不简单：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span> </span>&#123;</div><div class="line">    associatedtype <span class="type">Object</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span></div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object</span>?</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MemoryCache</span>: <span class="title">Caching</span> </span>&#123;</div><div class="line">    <span class="keyword">typealias</span> <span class="type">Object</span> = <span class="type">UIImage</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span> &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object</span>? &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DiskCache</span>: <span class="title">Caching</span> </span>&#123;</div><div class="line">    <span class="keyword">typealias</span> <span class="type">Object</span> = <span class="type">UIImage</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span> &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object</span>? &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> memory: <span class="type">Caching</span> = <span class="type">MemoryCache</span>() <span class="comment">// 🙃</span></div><div class="line"><span class="keyword">let</span> disk: <span class="type">Caching</span> = <span class="type">DiskCache</span>() <span class="comment">// 🙃</span></div><div class="line"><span class="keyword">let</span> caches: [<span class="type">Caching</span>] = [memory, disk] <span class="comment">// 🙃</span></div></pre></td></tr></table></figure>
+<p>然后 Xcode 就好很无情的提示你：</p>
+<blockquote>
+<p>❗️Protocol ‘Caching’ can only be used as generic constraint because it has Self or associated type requirements</p>
+</blockquote>
+<p>WTF?</p>
+<h2 id="What-is-Protocol-with-Associated-Types"><a href="#What-is-Protocol-with-Associated-Types" class="headerlink" title="What is Protocol with Associated Types?"></a>What is Protocol with Associated Types?</h2><p>看到这个错误提示，有经验的 Swift  程序员一般会想到，<code>Caching</code> 里面关联了一个类型，如果不指定这个关联的类型的具体类型是什么，作为一门静态语言，那可能就无法知道内存是怎么布局的。</p>
+<p>既然需要指定类型，马上想到的就是 <em>泛型参数</em>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> cache: <span class="type">Caching</span>&lt;<span class="type">UIImage</span>&gt; =  ...</div><div class="line"><span class="comment">// ❗️Protocol 'Caching' can only be used as generic constraint because it has Self or associated type requirements</span></div></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span>&lt;<span class="title">Object</span>&gt; </span>&#123;</div><div class="line">&#125;</div><div class="line"><span class="comment">// ❗️Protocols do not allow generic parameters; use associated types instead</span></div></pre></td></tr></table></figure>
+<p>WTF？</p>
+<h2 id="Protocol-as-Types"><a href="#Protocol-as-Types" class="headerlink" title="Protocol as Types"></a>Protocol as Types</h2><p>突然发现自己好像一点都不了解 protocol，看看文档介绍<a href="https://docs.swift.org/swift-book/LanguageGuide/Protocols.html" target="_blank" rel="external">Protocols — The Swift Programming Language (Swift 4.2)</a>。里面 Protocol as Types 一节有一段话：</p>
+<blockquote>
+<p>Protocols don’t actually implement any functionality themselves. Nonetheless, any protocol you create will become a fully-fledged type for use in your code.<br>Because it’s a type, you can use a protocol in many places where other types are allowed, including:</p>
+<ul>
+<li>As a parameter type or return type in a function, method, or initializer</li>
+<li>As the type of a constant, variable, or property</li>
+<li>As the type of items in an array, dictionary, or other container</li>
+</ul>
+</blockquote>
+<p>为什么 protocol + generic 就这么难用？应该怎么用？</p>
+<h2 id="PATs-in-Swift-Standard-Library"><a href="#PATs-in-Swift-Standard-Library" class="headerlink" title="PATs in Swift Standard Library"></a>PATs in Swift Standard Library</h2><p>既然不会用，那么看看 Standard Library 里面是如何使用的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">IteratorProtocol</span> </span>&#123;</div><div class="line">    <span class="comment">/// The type of element traversed by the iterator.</span></div><div class="line">    associatedtype <span class="type">Element</span></div><div class="line"></div><div class="line">    <span class="comment">/// - Returns: The next element in the underlying sequence, if a next element</span></div><div class="line">    <span class="comment">///   exists; otherwise, `nil`.</span></div><div class="line">    <span class="keyword">mutating</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element</span>?</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">Sequence</span> </span>&#123;</div><div class="line">    <span class="comment">/// A type representing the sequence's elements.</span></div><div class="line">    associatedtype <span class="type">Element</span></div><div class="line"></div><div class="line">    <span class="comment">/// A type that provides the sequence's iteration interface and</span></div><div class="line">    <span class="comment">/// encapsulates its iteration state.</span></div><div class="line">    associatedtype <span class="type">Iterator</span> : <span class="type">IteratorProtocol</span> <span class="keyword">where</span> <span class="type">Iterator</span>.<span class="type">Element</span> == <span class="type">Element</span></div><div class="line"></div><div class="line">    <span class="comment">/// Returns an iterator over the elements of this sequence.</span></div><div class="line">    <span class="function"><span class="keyword">func</span> <span class="title">makeIterator</span><span class="params">()</span></span> -&gt; <span class="type">Iterator</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后又发现有一个叫 <code>AnyIterator</code> 和 <code>AnySequence</code> 的东西。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnyIterator</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> base: <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</div><div class="line">        <span class="keyword">self</span>._box = _IteratorBox(base)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="number">_</span> body: @escaping () -&gt; <span class="type">Element</span>?) &#123;</div><div class="line">        <span class="keyword">self</span>._box = _IteratorBox(_ClosureBasedIterator(body))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;) &#123;</div><div class="line">        <span class="keyword">self</span>._box = _box</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">AnyIterator</span>: <span class="title">IteratorProtocol</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element</span>? &#123;</div><div class="line">        <span class="keyword">return</span> _box.next()</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnySequence</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnySequenceBox&lt;<span class="type">Element</span>&gt;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> makeUnderlyingIterator: @escaping () -&gt; <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</div><div class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(_ClosureBasedSequence(makeUnderlyingIterator))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnySequenceBox&lt;<span class="type">Element</span>&gt;) &#123;</div><div class="line">        <span class="keyword">self</span>._box = _box</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">extension</span> <span class="title">AnySequence</span>: <span class="title">Sequence</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">typealias</span> <span class="type">Iterator</span> = <span class="type">AnyIterator</span>&lt;<span class="type">Element</span>&gt;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">S</span> : <span class="type">Sequence</span>&gt;(<span class="number">_</span> base: <span class="type">S</span>) <span class="keyword">where</span> <span class="type">S</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</div><div class="line">        <span class="keyword">self</span>._box = _SequenceBox(_base: base)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这是什么鬼，先看看文档：</p>
+<blockquote>
+<p>This iterator forwards its next() method to an arbitrary underlying iterator having the same Element type, hiding the specifics of the underlying IteratorProtocol. —<a href="https://developer.apple.com/documentation/swift/anyiterator" target="_blank" rel="external">AnyIterator - Swift Standard Library | Apple Developer Documentation</a></p>
+<p>An instance of AnySequence forwards its operations to an underlying base sequence having the same Element type, hiding the specifics of the underlying sequence. —<a href="https://developer.apple.com/documentation/swift/anysequence" target="_blank" rel="external">AnySequence - Swift Standard Library | Apple Developer Documentation</a></p>
+</blockquote>
+<p>说白了就是包装一层，转发一下，它有个术语叫做 <strong>Type Erasure</strong></p>
+<h2 id="What-is-Type-Erasure"><a href="#What-is-Type-Erasure" class="headerlink" title="What is Type Erasure?"></a>What is Type Erasure?</h2><p>首先 Swift 的类型系统里面，有两种类型：</p>
+<ul>
+<li>Concrete Type: Int, Bool…</li>
+<li>Abstract Type: associatedType, <t></t></li>
+</ul>
+<p>对于抽象类型来说，编译器无法知道这个类型的确切功能。当编译器处理抽象类型的时候，它无法知晓其所占的空间大小；甚至可能会认为这个类型是不存在的。Swift 是静态语言。</p>
+<blockquote>
+<p>Type erasure is a process in code that makes abstract types concrete.</p>
+</blockquote>
+<p>具体看看 Swift Standard Library 里面，是怎么做到的：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 1. abstract base</span></div><div class="line"><span class="keyword">internal</span> <span class="class"><span class="keyword">class</span> <span class="title">_AnyIteratorBoxBase</span>&lt;<span class="title">Element</span>&gt; : <span class="title">IteratorProtocol</span> </span>&#123;</div><div class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>() &#123;&#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element</span>? &#123; _abstract() &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 2. private box</span></div><div class="line"><span class="keyword">internal</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">_IteratorBox</span>&lt;<span class="title">Base</span> : <span class="title">IteratorProtocol</span>&gt; : <span class="title">_AnyIteratorBoxBase</span>&lt;<span class="title">Base</span>.<span class="title">Element</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(<span class="number">_</span> base: <span class="type">Base</span>) &#123; <span class="keyword">self</span>._base = base &#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Base</span>.<span class="type">Element</span>? &#123; <span class="keyword">return</span> _base.next() &#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="keyword">var</span> _base: <span class="type">Base</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 3. public wrapper</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnyIterator</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</div><div class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> base: <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</div><div class="line">        <span class="keyword">self</span>._box = _IteratorBox(base)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="number">_</span> body: @escaping () -&gt; <span class="type">Element</span>?) &#123;</div><div class="line">        <span class="keyword">self</span>._box = _IteratorBox(_ClosureBasedIterator(body))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;) &#123;</div><div class="line">        <span class="keyword">self</span>._box = _box</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个模式概括起来就是三个步骤：</p>
+<ul>
+<li>an abstract base class</li>
+<li>a private box class</li>
+<li>a public wrapper class</li>
+</ul>
+<p>（想了解更多相关的理论知识？<em>Existential</em> 了解一下</p>
+<h2 id="One-more-thing"><a href="#One-more-thing" class="headerlink" title="One more thing"></a>One more thing</h2><p>到这里，我以为我已经掌握了如何用 PATs 了，然后有一天，我开始写一个轻量级的日志系统。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Logging</span>: <span class="title">Hashtable</span> </span>&#123;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">let</span> loggers: <span class="type">Set</span>&lt;<span class="type">Logging</span>&gt; = []</div></pre></td></tr></table></figure>
+<blockquote>
+<p>❗️Using ‘Logging’ as a concrete type conforming to protocol ‘Hashable’ is no supported</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">add</span><span class="params">(<span class="number">_</span> logger: Logging)</span></span> &#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>❗️Protocol ‘Logging’ can only be used as generic constraint because it has Self or associated type requirements</p>
+</blockquote>
+<p>看到这熟悉的错误，马上就想到 <code>Hashable</code> 其实是继承 <code>Equatable</code> 的，然后这个 <code>Equatable</code> 的几个方法里面，用了 <code>Self</code> 来占位，它其实也是 PATs 的一种。意不意外，惊不惊喜。（其实一点都不意外</p>
+<p>然后就是 type erasure 了，真正根据上面的三个步骤来写的时候，发现好像跟之前的又有点不太一样，因为它没有关联别的类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 1. abstract baes</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">_AnyLoggerBoxBase</span>&lt;<span class="title">T</span>&gt; : <span class="title">Logging</span> </span>&#123;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 2. private box</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">_LoggerBox</span>&lt;<span class="title">Base</span> : <span class="title">Logging</span>&gt; : <span class="title">_AnyLoggerBoxBase</span> &lt;<span class="title">Base</span>.<span class="title">Self</span>&gt;</span></div><div class="line"></div><div class="line">// 3. <span class="title">public</span> <span class="title">wrapper</span></div><div class="line"><span class="title">struct</span> <span class="title">AnyLogger</span>&lt;<span class="title">T</span>&gt; &#123;</div><div class="line">    <span class="keyword">init</span>&lt;<span class="type">L</span> : <span class="type">Logging</span>&gt;(<span class="number">_</span> base: <span class="type">L</span>) <span class="keyword">where</span> <span class="type">L</span>.<span class="type">Self</span> == <span class="type">Self</span> &#123;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这三步里面的泛型参数像是多出来的，根本无从下手。</p>
+<blockquote>
+<p>遇到不懂，首先看源码总是不会有错。— 圣人</p>
+</blockquote>
+<p>了解 Swift 的都知道，有一个叫做 <code>AnyHashable</code> 的东西。（一顿抄，完事</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><ul>
+<li><a href="https://www.youtube.com/watch?v=XWoNjiSPqI8&amp;t=2391s" target="_blank" rel="external">Alexis Gallagher - Protocols with Associated Types - YouTube</a></li>
+<li><a href="https://academy.realm.io/posts/tryswift-gwendolyn-weston-type-erasure/" target="_blank" rel="external">Keep Calm and Type Erase On</a></li>
+<li><a href="https://developer.apple.com/documentation/swift/anysequence" target="_blank" rel="external">AnySequence - Swift Standard Library | Apple Developer Documentation</a></li>
+<li><a href="https://github.com/apple/swift/blob/master/stdlib/public/core/ExistentialCollection.swift.gyb" target="_blank" rel="external">swift/ExistentialCollection.swift.gyb at master · apple/swift · GitHub</a></li>
+<li><a href="https://github.com/apple/swift/blob/master/stdlib/public/core/AnyHashable.swift" target="_blank" rel="external">swift/AnyHashable.swift at master · apple/swift · GitHub</a></li>
+</ul>
 
       
     </div>
@@ -372,7 +456,15 @@
           
             <a href="/tags/swift/" rel="tag"># swift</a>
           
-            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
+            <a href="/tags/type-erasure/" rel="tag"># type erasure</a>
+          
+            <a href="/tags/type-erased/" rel="tag"># type erased</a>
+          
+            <a href="/tags/pats/" rel="tag"># pats</a>
+          
+            <a href="/tags/protocol/" rel="tag"># protocol</a>
+          
+            <a href="/tags/generic/" rel="tag"># generic</a>
           
         </div>
       
@@ -440,8 +532,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.gif"
@@ -478,7 +579,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -503,6 +604,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol-Oriented-Programming"><span class="nav-number">1.</span> <span class="nav-text">Protocol-Oriented Programming</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Generics"><span class="nav-number">2.</span> <span class="nav-text">Generics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Protocol-with-Associated-Types"><span class="nav-number">3.</span> <span class="nav-text">What is Protocol with Associated Types?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol-as-Types"><span class="nav-number">4.</span> <span class="nav-text">Protocol as Types</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PATs-in-Swift-Standard-Library"><span class="nav-number">5.</span> <span class="nav-text">PATs in Swift Standard Library</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Type-Erasure"><span class="nav-number">6.</span> <span class="nav-text">What is Type Erasure?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#One-more-thing"><span class="nav-number">7.</span> <span class="nav-text">One more thing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">8.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
