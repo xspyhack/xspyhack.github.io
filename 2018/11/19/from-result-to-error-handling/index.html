@@ -97,7 +97,7 @@
 <meta property="og:url" content="https://blessingsoft.com/2018/11/19/from-result-to-error-handling/index.html">
 <meta property="og:site_name" content="Cherry Blessing">
 <meta property="og:description" content="最近关于 Add Result to the Standard Library 的提案正在激烈的讨论中，讨论的内容从命名到异步错误处理，再到是否应该有一个 Either 类型等等。  Result对于在项目中使用过 Swift 的人来说，Result 类型应该再熟悉不过了，在 community 中有着非常广泛的应用。最早看到对于 Result 的应用是在Alamofire 中，然后是有订阅的博">
-<meta property="og:updated_time" content="2019-04-04T13:29:20.937Z">
+<meta property="og:updated_time" content="2019-04-04T13:40:16.921Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="From Result to Error Handling">
 <meta name="twitter:description" content="最近关于 Add Result to the Standard Library 的提案正在激烈的讨论中，讨论的内容从命名到异步错误处理，再到是否应该有一个 Either 类型等等。  Result对于在项目中使用过 Swift 的人来说，Result 类型应该再熟悉不过了，在 community 中有着非常广泛的应用。最早看到对于 Result 的应用是在Alamofire 中，然后是有订阅的博">
@@ -376,7 +376,7 @@
 <blockquote>
 <p>最后值得一提的就是大多数人在写 ObjC 的时候都会选择性的忽略异常，经典的场景就是设计 API 的时候滥用 <code>id</code>，然后虽然在方法内部对参数类型进行了判断，但在出现参数类型不合法的时候，直接通过 <code>return</code> 来处理。</p>
 </blockquote>
-<p><a href="https://github.com/apple/swift-package-manager/blob/master/Sources/Basic/Result.swift" target="_blank" rel="external">Swift Package Manager</a><br><a href="https://onevcat.com/2018/10/swift-result-error/" target="_blank" rel="external">Result<t> 还是 Result<t, e:="" error=""></t,></t></a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://github.com/apple/swift-package-manager/blob/master/Sources/Basic/Result.swift" target="_blank" rel="external">Swift Package Manager</a><br><a href="https://onevcat.com/2018/10/swift-result-error/" target="_blank" rel="external">Result&amp;ltT&amp;gt 还是 Result&amp;ltT, E: Error&amp;gt</a></p>
 
       
     </div>
@@ -560,7 +560,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Result"><span class="nav-number">1.</span> <span class="nav-text">Result</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Error-Handling"><span class="nav-number">2.</span> <span class="nav-text">Error Handling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#万恶的-return"><span class="nav-number">2.1.</span> <span class="nav-text">万恶的 return</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无脑的-Optional"><span class="nav-number">2.2.</span> <span class="nav-text">无脑的 Optional</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#混淆的人为错误和程序错误"><span class="nav-number">2.3.</span> <span class="nav-text">混淆的人为错误和程序错误</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Result"><span class="nav-number">1.</span> <span class="nav-text">Result</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Error-Handling"><span class="nav-number">2.</span> <span class="nav-text">Error Handling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#万恶的-return"><span class="nav-number">2.1.</span> <span class="nav-text">万恶的 return</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无脑的-Optional"><span class="nav-number">2.2.</span> <span class="nav-text">无脑的 Optional</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#混淆的人为错误和程序错误"><span class="nav-number">2.3.</span> <span class="nav-text">混淆的人为错误和程序错误</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
