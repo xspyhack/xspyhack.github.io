@@ -1,0 +1,762 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="swift,chunked,streaming,http," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="TL;DR使用 Cocoa Foundation 框架来实现 HTTP Streaming/Chunked 的时候，底层会将设置的 Transfer-Encoding: chunked 的值改成大写的 Chunked 发出去，如果后端不支持，那么必须通过比如 hook 的方式不让底层对这个值进行修改并发送出去。其次就是如果服务器已经返回了数据但是框架没有给任何回调，可能是因为服务器返回的 Cont">
+<meta name="keywords" content="swift,chunked,streaming,http">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP Streaming&#x2F;Chunked">
+<meta property="og:url" content="https://blessingsoft.com/2020/04/15/http-chunked/index.html">
+<meta property="og:site_name" content="Cherry Blessing">
+<meta property="og:description" content="TL;DR使用 Cocoa Foundation 框架来实现 HTTP Streaming/Chunked 的时候，底层会将设置的 Transfer-Encoding: chunked 的值改成大写的 Chunked 发出去，如果后端不支持，那么必须通过比如 hook 的方式不让底层对这个值进行修改并发送出去。其次就是如果服务器已经返回了数据但是框架没有给任何回调，可能是因为服务器返回的 Cont">
+<meta property="og:updated_time" content="2020-04-15T15:13:05.849Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP Streaming&#x2F;Chunked">
+<meta name="twitter:description" content="TL;DR使用 Cocoa Foundation 框架来实现 HTTP Streaming/Chunked 的时候，底层会将设置的 Transfer-Encoding: chunked 的值改成大写的 Chunked 发出去，如果后端不支持，那么必须通过比如 hook 的方式不让底层对这个值进行修改并发送出去。其次就是如果服务器已经返回了数据但是框架没有给任何回调，可能是因为服务器返回的 Cont">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blessingsoft.com/2020/04/15/http-chunked/"/>
+
+
+
+
+
+  <title>HTTP Streaming/Chunked | Cherry Blessing</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cherry Blessing</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">A monad is a monoid in the category of endofunctors</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2020/04/15/http-chunked/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HTTP Streaming/Chunked</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-15T23:09:16+08:00">
+                2020-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/networking/" itemprop="url" rel="index">
+                    <span itemprop="name">networking</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="TL-DR"><a href="#TL-DR" class="headerlink" title="TL;DR"></a>TL;DR</h2><p>使用 <code>Cocoa Foundation</code> 框架来实现 <code>HTTP Streaming/Chunked</code> 的时候，底层会将设置的 <code>Transfer-Encoding: chunked</code> 的值改成大写的 <code>Chunked</code> 发出去，如果后端不支持，那么必须通过比如 <code>hook</code> 的方式不让底层对这个值进行修改并发送出去。其次就是如果服务器已经返回了数据但是框架没有给任何回调，可能是因为服务器返回的 <code>Content-Type</code> 为 <code>text/html</code>，导致框架等待 <code>first 512 bytes</code> 数据，改用其他的类型即可。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>提供全球服务的能音视频通话的 IM 产品，大多数都是以 <strong>自定义信令</strong> 为基础来提升网络性通信能以及防止被封禁。</p>
+<p>常见的几种通信方式有：</p>
+<ul>
+<li>IPPort (TCP)</li>
+<li>TLS (TLS Resumption or TLS Verify)</li>
+<li>GCM (FCM)</li>
+<li>WebSocket</li>
+<li>HTTP Persistent Connection</li>
+</ul>
+<p>前面几种都是其实都是通过 <code>IP/Port</code> 的方式来建立连接，那么一旦 IP 被封禁了，那么就只能通过其他手段下发 IP 地址然后不断的更换 IP 来绕过。 <code>GCM</code> 有着很秘密的东西，不方便多谈，基本可以认为它是不会被封禁的，但是需要尽量减少对它的依赖。<code>WebSocket</code> 需要服务器的支持，<code>Nginx</code> 和 <code>Amazon Cloudfront</code> 是支持的，但是 <code>Azure</code> 和 <code>Azure Domain Fronting</code> 不支持。所以最近为了进一步完善网络通信的建设，决定增加 HTTP 长链接的通道作为候补。</p>
+<h2 id="HTTP-Persistent-Connection"><a href="#HTTP-Persistent-Connection" class="headerlink" title="HTTP Persistent Connection"></a>HTTP Persistent Connection</h2><p>HTTP Persistent Connection 也叫 HTTP Connection Reuse 或者其他的 Keep Alive 等。像 IM 类型应用，如果每一次通信都使用普通的 HTTP(s) 的话，那么由于每次建立 TCP 都需要三次握手，外加上 SSL/TLS 握手，可能需要 10+ 个 RTT，这对于 IM 来说是难以接受的。优化的方向也很明显，就是尽量避免 HTTPS 建立和关闭所带来的性能消耗，最好就是整个生命周期内，只建立一次关闭一次。</p>
+<p>HTTP 1.1 中默认使用 <code>Keep-Alive</code> ，来达到连接复用，但仅仅是这个对于 IM 应用来说，还是太捉襟见肘了。然后对比 <code>Long Poll</code> 的方式，显然 <code>Streaming</code> 的方式性能会更加好。</p>
+<blockquote>
+<p>HTTP 2.0 也由于服务器不支持的原因，暂时不可行。</p>
+</blockquote>
+<h2 id="Streaming-Chunked"><a href="#Streaming-Chunked" class="headerlink" title="Streaming/Chunked"></a>Streaming/Chunked</h2><p>HTTP 1.1 中支持了 chunked message （见 <a href="https://en.wikipedia.org/wiki/Chunked_transfer_encoding" target="_blank" rel="external">Chunked transfer encoding - Wikipedia</a>）。利用这个特性，我们可以通过 chunked 的方式，来避免重复建立连接。</p>
+<p>网络请求包含了上行和下行，所以我们调研了两种方案：</p>
+<ol>
+<li>利用一条 URL 同时上下行 chunked 数据，发现 <code>cloudfront</code> 是支持的，但 <code>Azure</code> 不支持。Azure cdn 在收到第一个下行包时，会在上行包中插入 chunked 结束符，并不再转发上行包，但下行包仍然会被转发到客户端。❌</li>
+<li>利用两条 URL 来实现，一条s用于发送信令，一条用于读取信令。✅</li>
+</ol>
+<h3 id="How-to"><a href="#How-to" class="headerlink" title="How to"></a>How to</h3><p>既然是 HTTP 协议，那么首先想到的就是使用 <code>Foundation</code> 中的 <code>URLSession</code> 来实现。为了方便我们先把上行的 URL 叫做 <code>uplink</code> ，下行专用的 URL  叫做 <code>downlink</code>。</p>
+<p>首先按照 <code>HTTP 1.1</code> 的标准，将 <code>uplink</code> 的请求头 <code>Transfer-Encoding</code> 设为 <code>chunked</code>。为了能给异步持续的将信令数据发送到服务器，需要利用 <code>Bound Pair Stream</code>，将 <code>InputStream</code> 连上 <code>httpBody</code>，然后持有 <code>OutputStream</code>，每次有数据需要发送的时候，就将数据从 <code>OutputStream</code> 写入，然后数据就会流到 <code>InputStream</code> 去，<code>URLSession</code> 就会不断的读取数据并发送到服务器。</p>
+<p>至于 <code>downlink</code>，只需要服务器在 response 的时候，将 <code>Transfer-Encoding</code> 设为 <code>chunked</code> 即可，这样我们就可以通过 <code>delegate</code> 方法 <code>func urlSession(_:dataTask:didReceive:)</code> 源源不断的读取下行数据。</p>
+<p>除此之外，后端还需要对 <code>uplink</code> 和 <code>downlink</code> 进行配对，进行密钥交换等步骤。成功之后才能够开始发送和接收普通的信令消息。举例比如我们配对的步骤叫做 <code>name channel</code>，首先是 <code>uplink</code> 发送第一个 <code>name channel</code> 的包，将加密方式、密钥和 <code>Connection ID</code> 等发送给服务器，然后进入等待状态。然后 <code>downlink</code> 发起请求，将 <code>name channel</code> 的数据发送给服务器，服务器通过对比 <code>Connection ID</code> 配对成功后，通过 <code>downlink</code> 返回第一个包，通知客户端已经连接建立完成，后续可以开始发送普通信令。</p>
+<h3 id="But"><a href="#But" class="headerlink" title="But"></a>But</h3><p>但往往理想很丰满，现实却很骨感。</p>
+<h4 id="问题-1"><a href="#问题-1" class="headerlink" title="问题 1"></a>问题 1</h4><p>按照前面的流程建立连接，<code>uplink</code> 在发送第一个 chunk 数据的时候，服务端马上就返回了 <code>Server 500</code> 的错误。这个错误和 <code>Transfer-Encoding</code> 有关，通过抓包能看到请求的 <code>header</code> 和 <code>body</code> 都很普通。之前调研时使用 <code>python</code> 写的测试代码，已经证明了这个方案是没问题的。但到了 iOS 这一端，服务器却发生了错误。</p>
+<p>通过连调，发现 <code>uplink</code> 走到了普通 <code>Post</code> 的流程，而不是应该的 <code>Stream</code> 流程。如果将 <code>Transfer-Encoding</code> 去掉，却不会 <code>Server 500</code>，连接正常结束了。得出结论是当存在 <code>Tranfer-Encoding</code> 为 <code>Chunked</code> 时，后端走到了 <code>Post</code> 流程，然后用 <code>Post</code> 流程的方式去获取 <code>body</code> 的时候，数据异常导致了 <code>Server 500</code>，简单来说也就是 <code>Transfer-Encoding</code> 和 <code>body</code> 不匹配。</p>
+<p>根据抓包的数据对比，iOS 端的包和正常的 python 的包，<strong>唯一</strong> 的区别是 <code>Chunked</code> 和 <code>chunked</code>，一个大写一个小写。并且 <a href="https://www.wireshark.org" target="_blank" rel="external">Wireshark</a> 中也会提示 <code>[Expert Info (Warning/Undecoded): Unknown transfer coding name in Transfer-Encoding header]</code>。而我们在设置 <code>Transfer-Encoding</code> 的时候，其实也是使用小写的 <code>chunked</code>，但经过 <code>URLSession</code> 后会变成了大写。HTTP RFC 规定 header field 大小写不敏感，但没有对 value 进行规定。对比用的 python 的框架，则会将 <code>Transfer-Encoding</code> 处理成小写。这个问题和迷幻，但我们可以得到结论就是后端所使用的服务，并不支持大写的 <code>Chunked</code>。</p>
+<p>解决办法就是通过 Hook 的方式，禁止底层将 <code>header</code> 中的 <code>Transfer-Encoding</code> 进行更改。</p>
+<blockquote>
+<p>实际操作中其实还有更多问题，比如 <code>URLSessionDataTask</code> 进行处理 <code>orignalRequest</code> 的时候，会把 <code>currentRequest</code> 的 <code>Transfer-Encoding</code> 的值设为 <code>nil</code>。</p>
+</blockquote>
+<h4 id="问题-2"><a href="#问题-2" class="headerlink" title="问题 2"></a>问题 2</h4><p>在 <code>downlink</code> 发送完 <code>name channel</code> 之后，一直等待不到返回，直到超时后才返回第一个包，<code>HTTP/1.1 200 OK</code>，并马上结束连接。由于 <code>downlink</code> 其实就是一个普通的 <code>POST</code> 请求，需要的参数也比较少，<code>name channel</code> 的数据也很容易确定是否正确，并且返回的第一个包 <code>header</code> 和 <code>body</code> 除了 <code>Transfer-Encoding</code> 为 <code>Identity</code> 外并无异常。</p>
+<p>首先还是进行抓包，发现其实在请求刚发出去不久，服务器就马上返回了，并且 <code>header</code> 和 <code>body</code> 所有的数据都很正常，包括 <code>Transfer-Encoding</code> 为 <code>chunked</code>。问题来了，为什么服务器返回给 <code>URLSession</code> 了，<code>URLSession</code> 却没有通过 <code>delegate</code> 回调给我们呢，它连 <code>func urlSession(_:dataTask:didReceive, completionHandler:</code>，明明 <code>header</code> 和第一个 <code>chunk</code> 的 <code>body</code> 都已经返回了。</p>
+<p>这个问题比问题 1 还迷，虽然它把 <code>Transfer-Encoding</code> 从 <code>chunked</code> 改为了 <code>Identity</code> 还能接受，因为我们还可以通过查看 <code>header</code> 中没有 <code>Content-Length</code> 来判断，它其实就是 <code>chunked</code> 的方式。</p>
+<p>这个问题的解决过程比较曲折，首先我发现不等待 <code>downlink</code> 返回 <code>name channel</code> 成功，继续通过 <code>uplink</code> 发送信令时，<code>downlink</code> 就能够返回 <code>name channel</code> 成功的 <code>chunk</code> 以及后续信令的 <code>chunk</code>，<code>downlink</code> 不会超时断开。但是我们的整个流程是必须要等 <code>name channel</code> 成功之后才能发生消息，中间牵扯着很多 <code>seq</code> 和 <code>ack</code> 的问题。不能发送普通的信令，那么就尝试多发送一次 <code>name channel</code> 的时候，发现也还是不行。</p>
+<p>发送普通信令可以，发送 <code>name channel</code> 却不行。后来尝试了其他信令，看看是否是偶然问题，最终发现了主要的问题：<strong> <code>URLSession</code> 会等待第一个 512 bytes 数据，只有当 buffer 大于 512 bytes 后才会返回 response 和 data</strong>。</p>
+<p>通过以 <code>first 512 bytes</code> 为关键词搜索时，在 <a href="https://dev.w3.org/html5/cts/html5-type-sniffing.html" target="_blank" rel="external">HTML 5 rules for determining content types</a> 发现 H5 对 <code>first 512 bytes</code> 有一定的要求。猜想原因和 <code>Content-Type</code> 为 <code>text/html</code> 有关，后来验证了这个猜想。</p>
+<p>反过来一想，也很难说 <code>URLSession</code> 的实现是否有问题，但没有任何文档说明确认给人带来不少困扰。对比起来 <code>Java</code> 和 <code>Python</code> 都没有遇到这个问题。至于为什么服务器返回的是 <code>text/html</code>，而不是做客户端常用的 <code>application/json</code> 之类的，大概是因为后端用的服务框架是一个标准对 <code>web</code> 框架吧。</p>
+<p>到这里解决方式就很简单了，<strong> 把该死的 <code>Content-Type</code> 改为符合场景的 <code>application/octet-stream</code> </strong>。</p>
+<h4 id="问题-3"><a href="#问题-3" class="headerlink" title="问题 3"></a>问题 3</h4><p>其实是最初遇到的问题，就是 <code>Proxy</code> 的影响。首先 <code>Proxy</code> 看到的数据，是否可信的问题，其次就是 <code>Proxy</code> 对 <code>header</code> 带来的影响，比如 <code>End-to-end headers</code> 和 <code>Hop-by-hop headers</code>。(<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers" target="_blank" rel="external">HTTP headers - HTTP | MDN</a>）</p>
+<p>开发过程中，早期使用 <code>Charles</code> 和 <code>ProxyMan</code> 来抓 <code>HTTPS</code> 的包，没有遇到问题 1 <code>Server 500</code> 的问题，某一次重启电脑后，没有打开 <code>Proxy</code>，然后才发现会稳定出现 <code>Server 500</code>。</p>
+<p>还有值得一提的就是代码服务器的问题，在开发过程中也遇到过直连和通过代理服务器后出现不一致的问题，虽然后端说代理服务器不会做任何处理，只是将数据进行透传。</p>
+<h4 id="其他的方案"><a href="#其他的方案" class="headerlink" title="其他的方案"></a>其他的方案</h4><p>在解决上面的几个问题时，由于文档和相关的讨论都比较少，并且没有看到有人遇到这些问题，在确定问题出在 <code>URLSession</code> 及其底层实现上的情况下，在没头绪的时候还尝试过 <code>libcurl</code> 的方案。</p>
+<p>由于 apple 为了建设 Swift 的生态，提供了一个开源版的 <a href="https://github.com/apple/swift-corelibs-foundation" target="_blank" rel="external">Foundation</a>，其中就包含有 <a href="https://github.com/apple/swift-corelibs-foundation/tree/master/Sources/FoundationNetworking/URLSession" target="_blank" rel="external">URLSession</a> 的实现。在使用过程中发现它在处理 <code>body</code> 的时候，是有问题的： <code>当 Body 为 Stream 的情况下，根据 libcurl 的 read function 来读取 body 数据，每次读取一个指定大小的 chunk，当读取的时候，发现 inputStream 已经没有数据了，就认为是读取完所有数据了。</code> 这显然与我们的要求，以及 iOS 上的 <code>URLSession</code> 的行为不一致，<code>input stream</code> 在读的时候没读到数据，有可能 <code>output stream</code> 还在写或者即将写，并不代表整个流已经完成。最简单来说就是为了性能考虑，<code>Output stream</code> 并不是用循环的方式进行写数据的，它有一个有限大小的 <code>buffer</code>，必须要等到有足够空间的时候才能成功写入数据。所以一般的方式也是 <a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Streams/Streams.html#//apple_ref/doc/uid/10000188-SW1" target="_blank" rel="external">官方推荐</a> 的方式，都是使用 <code>RunLoop</code> 。</p>
+<p>所以我们需要将这部分的实现改一下，改为 <code>RunLoop</code> 的方式，当 <code>read function</code> 要读取数据时，发现 <code>input stream</code> 还没有数据，那么就返回 <code>retryLater</code>，告诉 <code>libcurl</code> 的 <code>read socket</code> 暂停发送数据，先等待。当 <code>RunLoop</code> 告诉我们有数据了 <code>hasBytesAvailable</code> 的时候，再让 <code>read socket</code> 进行 <code>resume</code>。可以参考 <code>File</code> 类型的 <code>Body</code> 的实现。</p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>如果想用 <code>Cocoa Foundation</code> 实现 <code>Streaming/Chunked</code>，可能并不会那么顺利。有些问题在其他平台没有暴露出来，也不代表着一定就是 <code>Cocoa Foundation</code> 的锅，要善于用可靠的方式从一个更 low level 的角度找到不同平台不同实现直接的差异。当没有文档资料对问题有帮助的时候，「思考 -&gt; 猜测 -&gt; 验证」，可能是最佳的解决问题的方式。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+            <a href="/tags/chunked/" rel="tag"># chunked</a>
+          
+            <a href="/tags/streaming/" rel="tag"># streaming</a>
+          
+            <a href="/tags/http/" rel="tag"># http</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/05/existential/" rel="next" title="∃ Existential">
+                <i class="fa fa-chevron-left"></i> ∃ Existential
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/25/http-chunked-2/" rel="prev" title="HTTP Streaming/Chunked 2">
+                HTTP Streaming/Chunked 2 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Xspyhack" />
+          <p class="site-author-name" itemprop="name">Xspyhack</p>
+           
+              <p class="site-description motion-element" itemprop="description">Why join the navy if you can be a pirate?</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TL-DR"><span class="nav-number">1.</span> <span class="nav-text">TL;DR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-Persistent-Connection"><span class="nav-number">3.</span> <span class="nav-text">HTTP Persistent Connection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Streaming-Chunked"><span class="nav-number">4.</span> <span class="nav-text">Streaming/Chunked</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to"><span class="nav-number">4.1.</span> <span class="nav-text">How to</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#But"><span class="nav-number">4.2.</span> <span class="nav-text">But</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">问题 1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#问题-2"><span class="nav-number">4.2.2.</span> <span class="nav-text">问题 2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#问题-3"><span class="nav-number">4.2.3.</span> <span class="nav-text">问题 3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他的方案"><span class="nav-number">4.2.4.</span> <span class="nav-text">其他的方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conclusion"><span class="nav-number">4.3.</span> <span class="nav-text">Conclusion</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xspyhack</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
