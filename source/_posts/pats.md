@@ -9,6 +9,8 @@ tags:
 	- generic
 categories: advanced swift
 ---
+> 更新：随着 Swift 中一些新的提案（如 [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md) 和 [SE-0335](https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md)）的提出，大大的简化了 Swift 中的 Protocol 的使用，文中的一些概念或者观点抑或是写法已经显得落后而不适用。--2022.01.01
+
 > 很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types
 
 ## Protocol-Oriented Programming
