@@ -1,5 +1,6 @@
 ---
 title: How to design a lightweight Logging System
+date: 2018-08-26 20:00:00
 tags:
     - swift
     - logger

@@ -1,5 +1,6 @@
 ---
 title: PATs
+date: 2018-08-26 20:00:00
 tags:
 	- swift
 	- type erasure

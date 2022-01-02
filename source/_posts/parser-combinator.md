@@ -1,5 +1,6 @@
 ---
 title: Parser Combinator
+date: 2017-05-28 20:00:00
 tags:
 	- parser
 	- parser combinator

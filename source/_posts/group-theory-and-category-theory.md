@@ -1,5 +1,6 @@
 ---
 title: Group Theory and Category Theory
+date: 2017-06-12 20:00:00
 tags:
 	- group theory
 	- category theory

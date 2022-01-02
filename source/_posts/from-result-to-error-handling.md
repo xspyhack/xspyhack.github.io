@@ -1,5 +1,6 @@
 ---
 title: From Result to Error Handling
+date: 2018-11-19 20:00:00
 tags:
     - swift
     - error handling

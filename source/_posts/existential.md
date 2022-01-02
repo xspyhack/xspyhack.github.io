@@ -1,5 +1,6 @@
 ---
 title: ∃ Existential
+date: 2019-06-05 20:00:00
 tags:
     - swift
     - existential

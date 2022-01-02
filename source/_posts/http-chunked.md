@@ -1,5 +1,6 @@
 ---
 title: HTTP Streaming/Chunked
+date: 2020-04-15 20:00:00
 tags:
     - swift
     - chunked
@@ -18,13 +19,13 @@ categories: networking
 
 常见的几种通信方式有：
 
-* IPPort (TCP)
+* IP/Port (TCP)
 * TLS (TLS Resumption or TLS Verify)
 * GCM (FCM)
 * WebSocket
 * HTTP Persistent Connection
 
-前面几种都是其实都是通过 `IP/Port` 的方式来建立连接，那么一旦 IP 被封禁了，那么就只能通过其他手段下发 IP 地址然后不断的更换 IP 来绕过。 `GCM` 有着很秘密的东西，不方便多谈，基本可以认为它是不会被封禁的，但是需要尽量减少对它的依赖。`WebSocket` 需要服务器的支持，`Nginx` 和 `Amazon Cloudfront` 是支持的，但是 `Azure` 和 `Azure Domain Fronting` 不支持。所以最近为了进一步完善网络通信的建设，决定增加 HTTP 长链接的通道作为候补。
+前面几种都是其实都是通过 `IP/Port` 的方式来建立连接，那么一旦 IP 被封禁了，那么就只能通过其他手段下发 IP 地址然后不断的更换 IP 来绕过。 `GCM`([FCM](https://firebase.google.com/docs/cloud-messaging/)) 是谷歌提供的信令通道。`WebSocket` 需要服务器的支持，`Nginx` 和 `Amazon Cloudfront` 是支持的，但是 `Azure` 和 `Azure Domain Fronting` 不支持。所以最近为了进一步完善网络通信的建设，决定增加 HTTP 长链接的通道作为候补。
 
 
 ## HTTP Persistent Connection
