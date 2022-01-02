@@ -70,4 +70,4 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: https://github.com/xspyhack/xspyhack.github.io.git
+  repository: git@github.com:xspyhack/xspyhack.github.io.git
