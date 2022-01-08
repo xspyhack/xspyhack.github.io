@@ -1,0 +1,852 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="swift,monad,functional programming,parser,parser combinator,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
+<meta name="keywords" content="swift,monad,functional programming,parser,parser combinator">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Parser Combinator">
+<meta property="og:url" content="https://blessingsoft.com/2017/05/28/parser-combinator/index.html">
+<meta property="og:site_name" content="Cherry Blessing">
+<meta property="og:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2022-01-02T13:34:55.298Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Parser Combinator">
+<meta name="twitter:description" content="解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。 Parser将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。 ( 4 + 3  ) 就是一个表达式语句，它由字符 (  4 空格 + 3 和 ) 组成。我们可以将这个表达式解析成一种 表达式树 (AST 的一种)。 所以我们的解析器简单的用一个">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blessingsoft.com/2017/05/28/parser-combinator/">
+
+
+
+
+
+  <title>Parser Combinator | Cherry Blessing</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cherry Blessing</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">A monad is a monoid in the category of endofunctors</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2017/05/28/parser-combinator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Parser Combinator</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-28T20:00:00+08:00">
+                2017-05-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/functional-programming/" itemprop="url" rel="index">
+                    <span itemprop="name">functional programming</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</p>
+<h2 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h2><p>将一个数据流解析成结构化的数据的工具，我们称为解析器。比如我们需要将用户输入的表达式字符串解析成 AST，我们就可以使用解析器来达到我们的目的。</p>
+<p><code>( 4 + 3  )</code> 就是一个表达式语句，它由字符 <code>(</code>  <code>4</code> <code>空格</code> <code>+</code> <code>3</code> 和 <code>)</code> 组成。我们可以将这个表达式解析成一种 <em>表达式树</em> (AST 的一种)。</p>
+<p>所以我们的解析器简单的用一个函数来描述就是：<br><code>func parser(_ string: String) -&gt; AST</code></p>
+<p>我们不是用正则表达式来解析输入的表达式字符串，为了得到表达式树里面的节点，我们需要一步步的解析，每次解析得到不同的节点。所以我们需要将解析器的定义变成解析成功的话，会返回结果值和剩下的字符串。</p>
+<p><code>func parser(_ string: String) -&gt; (AST, String)</code></p>
+<p>表达式树的节点都是一些 <code>4</code> <code>+</code> 这种不同类型的数据，所以为了表示解析 <code>4</code> 成功和解析 <code>+</code> 成功，我们的返回值可以定义为泛型。并且表达出解析失败的情况，我们可以使用可选值。最终解析器函数就变成了：</p>
+<p><code>func parser&lt;T&gt;(_ string: String) -&gt; (T, String)?</code></p>
+<p>所以解析第一个数字 4 的解析器函数为：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parser</span><span class="params">(<span class="number">_</span> string: String)</span></span> -&gt; (<span class="type">Int</span>, <span class="type">String</span>)? &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> head = string.characters.first, head == <span class="string">"4"</span> <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Optional</span>.some((<span class="number">4</span>, <span class="type">String</span>(string.characters.<span class="built_in">dropFirst</span>())))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Combinator"><a href="#Combinator" class="headerlink" title="Combinator"></a>Combinator</h2><blockquote>
+<p>One of the distinguishing features of functional programming is the widespread use of combinators to construct programs. <em>A combinator is a function which builds program fragments from program fragments</em>; in a sense the programmer using combinators constructs much of the desired program automatically, rather that writing every detail by hand. – John Hughes</p>
+</blockquote>
+<p>其实 Combinator 很容易理解，就像字面意思那样 —— 组合子。首先定义一系列原子操作，然后定义组合的规则，然后根据组合的规则把这些原子操作组合起来。</p>
+<h2 id="Parser-Combinator"><a href="#Parser-Combinator" class="headerlink" title="Parser Combinator"></a>Parser Combinator</h2><p>回到开头的话：<em>解析组合子是由多个解析器为参数并返回一个解析器的高阶函数。</em> 所以我们需要重新定义一下我们的解析器，把它变成一个解析组合子。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Parser</span>&lt;<span class="title">A</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> parse: (<span class="type">String</span>) -&gt; (<span class="type">A</span>, <span class="type">String</span>)?</span><br><span class="line">    <span class="comment">// (input) -&gt; (result, remaining)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个解析字符串的解析器，我们把这个函数放到一个结构体 <code>Parser</code> 中，作为一个 <code>parse</code> 变量。当然我们也可以用类型别名 <code>typealias Parser&lt;Result&gt; = (String) -&gt; (Result, String)?</code>。</p>
+<p>当然解析组合子不仅仅能解析字符串，所以可以用泛型来把它变得更通用。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Parser</span>&lt;<span class="title">I</span>, <span class="title">O</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> parse: (<span class="type">I</span>) -&gt; (<span class="type">O</span>, <span class="type">I</span>)?</span><br><span class="line">    <span class="comment">// (input) -&gt; (output, remaining input)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以解析数字字符 <code>4</code> 的解析器就变成了：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">character4</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> head = input.characters.first, head == <span class="string">"4"</span> <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (<span class="string">"4"</span>, <span class="type">String</span>(input.characters.<span class="built_in">dropFirst</span>()))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以根据 <code>func character4() -&gt; Parser&lt;Character&gt;</code> 很容易得到一个能够解析任何字符的解析器：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">character</span><span class="params">(<span class="number">_</span> character: Character)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> head = input.characters.first, head == character <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (head, <span class="type">String</span>(input.characters.<span class="built_in">dropFirst</span>()))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据 <code>character</code> 和 <code>digit</code> 的区别，很容易又得到能够解析任何数字的解析器：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">digit</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> head = input.characters.first, <span class="string">"0"</span>...<span class="string">"9"</span> ~= head <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (head, <span class="type">String</span>(input.characters.<span class="built_in">dropFirst</span>()))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据 <code>character</code> 和 <code>digit</code> 相同和不同，我们可以进一步抽象，把相同部分进行封装，把不同部分作为参数，得到新的解析器：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">satisfy</span><span class="params">(<span class="number">_</span> condition: @escaping <span class="params">(Character)</span></span></span> -&gt; <span class="type">Bool</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> head = input.characters.first, condition(head) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (head, <span class="type">String</span>(input.characters.<span class="built_in">dropFirst</span>()))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以解析数字：</p>
+<p><code>(satisfy { &quot;0&quot;...&quot;9&quot; ~= $0 }).parse(&quot;1abc&quot;)</code></p>
+<p>解析空格：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isSpace</span><span class="params">(<span class="number">_</span> character: Character)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">String</span>(character).trimmingCharacters(<span class="keyword">in</span>: .whitespacesAndNewlines).isEmpty</span><br><span class="line">&#125;</span><br><span class="line">(satisfy(isSpace)).parse(<span class="string">" abc"</span>)</span><br></pre></td></tr></table></figure>
+<p>所以我们只需要给 <code>satisfy</code> 函数传入一个是否属于 X 的函数，就可以得到一个能够解析 x 的解析器。</p>
+<h2 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h2><p>最基本的 <code>character</code> 有了，<code>digit</code> 有了，当我们需要解析一个字符串 <code>alex</code> 的时候，我们只需要把 <code>alex</code> 看成 <code>a</code> <code>l</code> <code>e</code> <code>x</code> 4 个字符，然后不断的用 <code>character</code> 进行解析，最后把每一步返回的结果合并起来就行了。考虑到解析一个字符串是一个基本功能，为了不用每次写重复的代码，把它封装成用来解析 <code>string</code> 的解析器。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> parsers = str.characters.<span class="built_in">map</span> &#123; character($<span class="number">0</span>) &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">var</span> results: [<span class="type">Character</span>] = []</span><br><span class="line">        <span class="keyword">var</span> stream = input</span><br><span class="line">        <span class="keyword">for</span> parser <span class="keyword">in</span> parsers &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = parser.parse(stream) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">            &#125;</span><br><span class="line">            results.append(result)</span><br><span class="line">            stream = remainder</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (<span class="type">String</span>(results), stream)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>观察 parse 函数类型 <code>(String) -&gt; (A, String)</code>，解析成功的返回值是解析结果和 <strong>剩余</strong> 的字符串，所以解析 <code>alex</code> 的时候：</p>
+<ol>
+<li>“alex”: ‘a’ -&gt; (‘a’, “lex”)</li>
+<li>“lex”: ‘l’ -&gt; (‘l’, “ex”)</li>
+<li>“ex”: ‘e’ -&gt; (‘e’, “x”)</li>
+<li>“x”: ‘x’ -&gt; (‘x’, “”)</li>
+<li>Parser&lt;”alex”&gt;</li>
+</ol>
+<p>可以看到这几步做的事情除了参数不一样，内部逻辑是一样的，而且很容易看出是一个递归的过程，<strong>每次解析成功就 <code>吃掉</code> 第一个字符</strong>（留意这句话），然后解析剩下的字符串。</p>
+<p>所以我们写一个递归的版本：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (head, tail) = uncons(str.characters) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 0. 把空字符解析器去解析任何字符串，都认为是解析成功</span></span><br><span class="line">            <span class="keyword">return</span> (<span class="string">""</span>, input)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 1. 先解析第一个字符</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder1) = character(head).parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 2. 然后解析剩下的所有</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder2) = string1(<span class="type">String</span>(tail)).parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 3. 返回("结果", "剩余的字符串")</span></span><br><span class="line">        <span class="keyword">return</span> (str, remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">uncons</span>&lt;C: Collection&gt;<span class="params">(<span class="number">_</span> xs: C)</span></span> -&gt; (<span class="type">C</span>.<span class="type">Iterator</span>.<span class="type">Element</span>, <span class="type">C</span>.<span class="type">SubSequence</span>)? &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> head = xs.first <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (head, xs.suffix(from: xs.index(after: xs.startIndex)))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>观察 1 和 2，在这两步中，我们都没有使用解析的 <strong>结果</strong>，这两步实现的仅仅是 <strong>每次解析成功就 <code>吃掉</code> 结果</strong>！最后在第 3 步一次将结果返回。也就是说我们 1 和 2 这两本并不关心结果，只关心这些要解析道字符存在就行了。</p>
+<p>我们把解析成功吃掉结果这一步封装一下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">discarding</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result2, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 只保留右边的解析器的结果 result2，没有 result1</span></span><br><span class="line">        <span class="keyword">return</span> (result2, remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>discarding</code> 函数会 <strong>吃掉</strong> 左边第一个参数 <code>x</code> 的解析结果，返回值中只保留右边 <code>y</code> 的解析结果。用 <code>discarding</code> 函数重写一下上面的 <code>string</code> 函数：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (head, tail) = uncons(str.characters) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 把空字符解析器去解析任何字符串，都认为是解析成功</span></span><br><span class="line">            <span class="keyword">return</span> (<span class="string">""</span>, input)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 1 吃掉 character(head) 的结果</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder) = discarding(character(head), string2(<span class="type">String</span>(tail))).parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 2 返回 ("结果", "剩余的字符串")</span></span><br><span class="line">        <span class="keyword">return</span> (str, remainder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这次改版的 <code>string</code> 里面第 1 步中的解析结果还是被忽略了，所以是否可以继续用 <code>discarding</code> 来简化？但是 <code>discarding</code> 函数需要两个解析器，但函数内只有 <code>lift</code> 返回的一个解析器，所以没办法继续简化了？</p>
+<p>仔细看 <code>string</code> 函数体的第一行 <code>return Parser {}</code> 就是一个解析器，能否把这个解析器利用上呢？<code>discarding</code> 是在 <code>Parser {}</code> 里面的，所以只要能想办法把它展平，那么就能再次利用上 <code>lift</code>，而且展平后的解析器需要做为 <code>string</code> 函数的返回值，所以它肯定是做为 <code>discarding</code> 的右边的参数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> lhs = <span class="type">Parser</span> &#123;&#125;</span><br><span class="line">    <span class="keyword">let</span> rhs = <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;&#125;</span><br><span class="line">    <span class="keyword">return</span> lift(x, y)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据第 2 步的 <code>return (str, remainder)</code> 可以知道，最终的返回结果是 <code>(输入的，lhs 吃剩的)</code>，所以很容易得到 <code>let rhs = Parser&lt;String&gt; { (str, $0) }</code>。所以可以推出 lhs 要做的只是负责吃掉一部分。也就是上面的第 1 步所做的。所以：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> (head, tail) = uncons(str.characters) <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 1 把空字符解析器去解析任何字符串，都认为是解析成功</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="string">""</span>, input)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2 吃掉</span></span><br><span class="line">    <span class="keyword">let</span> lhs = discarding(character(head), string2(<span class="type">String</span>(tail)))</span><br><span class="line">    <span class="comment">// 3 结果和剩下的</span></span><br><span class="line">    <span class="keyword">let</span> rhs = <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123; (str, $<span class="number">0</span>) &#125;</span><br><span class="line">    <span class="comment">// 4 返回</span></span><br><span class="line">    <span class="keyword">return</span> discarding(lhs, rhs)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数的返回值是 <code>Parser</code>，由于外面没有 Parser {} ，展开后 1 那里需要返回一个 <code>Parser</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> (head, tail) = uncons(str.characters) <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 1 把空字符解析器去解析任何字符串，都认为是解析成功</span></span><br><span class="line">        <span class="keyword">return</span> <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123; (<span class="string">""</span>, $<span class="number">0</span>) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2</span></span><br><span class="line">    <span class="keyword">let</span> lhs = discarding(character(head), string2(<span class="type">String</span>(tail)))</span><br><span class="line">    <span class="comment">// 3</span></span><br><span class="line">    <span class="keyword">let</span> rhs = <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123; (str, $<span class="number">0</span>) &#125;</span><br><span class="line">    <span class="comment">// 4</span></span><br><span class="line">    <span class="keyword">return</span> discarding(lhs, rhs)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>明眼人可以看到 1 和 3 只有 <code>&quot;&quot;</code> 和 <code>str</code> 不一样，剩下的一模一样，虽然代码不长，但我们还是把它相同部分封装成一个函数，然后把不同的部分做为参赛。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">string</span><span class="params">(<span class="number">_</span> str: String)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> (head, tail) = uncons(str.characters) <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 1 把空字符解析器去解析任何字符串，都认为是解析成功</span></span><br><span class="line">        <span class="keyword">return</span> pure(<span class="string">""</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2</span></span><br><span class="line">    <span class="keyword">let</span> lhs = discarding(character(head), string2(<span class="type">String</span>(tail)))</span><br><span class="line">    <span class="comment">// 3</span></span><br><span class="line">    <span class="keyword">let</span> rhs = pure(str)</span><br><span class="line">    <span class="comment">// 4</span></span><br><span class="line">    <span class="keyword">return</span> discarding(lhs, rhs)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Lift a value</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">pure</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: A)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123; (x, $<span class="number">0</span>) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以封装一个简洁的 <code>string</code> 解析器，花了很多功夫，但抛开性能，它比迭代的版本更简洁易懂。</p>
+<h2 id="Combine"><a href="#Combine" class="headerlink" title="Combine"></a>Combine</h2><p>观察表达式 <code>( 4 + 3  )</code>，里面 <code>(</code> 和 <code>4</code> 之间有 1 个空格，数字 <code>3</code> 和 <code>)</code> 中间是有 2 个空格，在做加法运算的时候，这些 <em>many</em> 个空格是没有意义的，所以需要 <em>skip</em> 掉。</p>
+<h4 id="Many"><a href="#Many" class="headerlink" title="Many"></a>Many</h4><p>首先需要解析空格的解析器，前面已经有实现过：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">space</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> satisfy(isSpace)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于空格数量未知，可能有 <em>many</em> 个，假如有一个解析器，能够解析 <em>many</em> 个 parser。用一个 loop 不断去解析就能实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">many</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">A</span>]&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">var</span> results: [<span class="type">A</span>] = []</span><br><span class="line">        <span class="keyword">var</span> stream = input</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">let</span> (result, remainder) = x.parse(stream) &#123;</span><br><span class="line">            results.append(result)</span><br><span class="line">            stream = remainder</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (results, stream)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>任意个空格就是：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">spaces</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">Character</span>]&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> many(space())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>spaces</code> 得到的是一个 <code>Parser&lt;[Character]&gt;</code> 类型的 parser，但是按照理解更希望得到一个 <code>Parser&lt;String&gt;</code> 类型的 parser。在 Swift 中，<code>String([Character])</code> 就能够将 <code>[Character]</code> 拍扁成 <code>String</code> 类型。所以把 <code>many</code> 稍微修改一下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">many</span>&lt;Character&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;Character&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">var</span> results: [<span class="type">Character</span>] = []</span><br><span class="line">        <span class="keyword">var</span> stream = input</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">let</span> (result, remainder) = x.parse(stream) &#123;</span><br><span class="line">            results.append(result)</span><br><span class="line">            stream = remainder</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (<span class="type">String</span>(results), stream)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为不是任何泛型 A 类型，都能用 String 拍扁，也不一定能通过其他类型进行拍扁，所以这里把泛型 A 去掉，直接用 Character 代替。但是这样做并不理想，因为 <code>many</code> 解析器从一个泛型解析器，变成了一个只能解析 Character 类型的解析器，变成了 <code>manyCharacter</code>。后面考虑解析这个问题，重新把 <code>many</code> 变成通用的解析器。</p>
+<h4 id="Skip"><a href="#Skip" class="headerlink" title="Skip"></a>Skip</h4><p>接着实现一个通用的 <code>skip</code> 解析器，它要做的事情很简单，输入什么吃掉什么，返回剩下的，和上面吃掉左边的 <code>discarding</code> 很像，不一样的是 <code>skip</code> 只有一个参数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">skip</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Void</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> ((), input)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> ((), remainder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>把 <code>skip</code> 和 <code>spaces</code> 进行组合：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">skipSpaces</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Void</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> skip(spaces)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Many1"><a href="#Many1" class="headerlink" title="Many1"></a>Many1</h4><p>前面实现的 <code>digit</code> 解析器，它只能解析个位数，这是没有什么卵用的。相比 <code>digit</code>，更加需要的是一个 <code>number</code> 解析器。一个 <em>number</em> 实际上也是由 <em>many</em> 个 <em>digit</em> 组成。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">number</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">Character</span>]&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> many(digit())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">number().parse(<span class="string">"123abc"</span>) <span class="comment">// (["1", "2", "3"], "abc")</span></span><br><span class="line">number().parse(<span class="string">"abc"</span>) <span class="comment">// ([], "abc")</span></span><br></pre></td></tr></table></figure>
+<p>等等！<code>number().parse(&quot;abc&quot;)</code> 也解析成功了，结果是空数组。这并不是想要的结果，一个 <em>string</em> 可以是空的，<em>space</em> 甚至也可以是空的，但一个 <em>number</em> 不能是空的。所以需要另外一个只是有一个的 <code>many</code>。这其实很常见，比如正则表达式中有 <code>*</code> 和 <code>+</code>，一个 {0, +} 一个是 {1, +}。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">many1</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">A</span>]&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="comment">// 多加一个判断，第一个值必须满足条件</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, <span class="number">_</span>) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">var</span> results: [<span class="type">A</span>] = []</span><br><span class="line">        <span class="keyword">var</span> stream = input</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">let</span> (result, remainder) = x.parse(stream) &#123;</span><br><span class="line">            results.append(result)</span><br><span class="line">            stream = remainder</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (results, stream)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以正确的 <code>number</code> 解析器就变成：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">number</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;[<span class="type">Character</span>]&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> many1(digit())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里 <code>number</code> 解析器和 <code>spaces</code> 解析器遇到了同样的问题，<code>number</code> 解析器的结果应该是 <code>Int</code>（暂不考虑浮点数），而不是 <code>[Character]</code>。解决方法可以类似 <code>manyCharacter</code>，但是这显示是很有问题的，抽象抽象抽象！</p>
+<p>程序员要有抽象思维，要学会用更高的层次的思维去看待问题，发现不同问题的共同点。<code>[Character]</code> 可以用 <code>String([Character])</code> 变成一个 <code>String</code>。对于 <code>digit</code> character，同样的也是用 <code>String([Character])</code> 拍扁，然后用 <code>Int(String)</code> 得到一个 <code>number</code>。</p>
+<p>结合 Swift 的 OOP（面向协议编程），可以定义一个协议，暂且叫做 <code>Combinable</code> :D</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Combinable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">combine</span><span class="params">(<span class="number">_</span> xs: [Character])</span></span> -&gt; <span class="type">Self</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Int</span>: <span class="title">Combinable</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">combine</span><span class="params">(<span class="number">_</span> xs: [Character])</span></span> -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Int</span>(<span class="type">String</span>(describing: xs))!</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">String</span>: <span class="title">Combinable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">combine</span><span class="params">(<span class="number">_</span> xs: [Character])</span></span> -&gt; <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">String</span>(describing: xs)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">many1</span>&lt;A: Combinable&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;Character&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, <span class="number">_</span>) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">var</span> results: [<span class="type">Character</span>] = []</span><br><span class="line">        <span class="keyword">var</span> stream = input</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">let</span> (result, remainder) = x.parse(stream) &#123;</span><br><span class="line">            results.append(result)</span><br><span class="line">            stream = remainder</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (<span class="type">A</span>.combine(results), stream)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后就可以得到：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">number</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Int</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> many1(digit())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">spaces</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> many1(space()) <span class="comment">// 忽略 spaces 可以为空的情况</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上 <code>skipSpaces</code> 还可以用另外一个角度来拆分，上面先解析 <em>many</em> 个空格，然后一次 <em>skip</em> 掉。还可以每次 <em>skip</em> 一个空格，然后进行 <em>many</em> 次。不同的地方是 <code>skip</code> 和 <code>many</code> 两个 parser 的调用次序不一样，甚至还可以定义一个叫做 <code>skipMany</code> 的解析器，这也说明了 <strong>Combinator</strong> 的强大。通过定义一系列基础的 parser，进行不同的排列组合操作，最后覆盖所有的 case。（理想状态</p>
+<h4 id="Zip"><a href="#Zip" class="headerlink" title="Zip"></a>Zip</h4><p>合并两个 parser 的解析器 <code>zip</code> 的实现也很简单：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">zip</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;(<span class="type">A</span>, <span class="type">B</span>)&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result1, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result2, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ((result1, result2), remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Choice"><a href="#Choice" class="headerlink" title="Choice"></a>Choice</h4><p>接下来还需要解析几个简单的一元运算符 <code>+</code> <code>-</code> <code>*</code> <code>/</code>。去掉空格后，两个数中间必须是其中一个运算符那么表达式就是合法的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">opt</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Character</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> opts = [<span class="string">"+"</span>, <span class="string">"-"</span>, <span class="string">"*"</span>, <span class="string">"/"</span>].<span class="built_in">map</span> &#123; character($<span class="number">0</span>.characters.first!) &#125;</span><br><span class="line">    <span class="keyword">return</span> choice(opts)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 也可以叫 one(of:)</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">choice</span>&lt;A, S: Sequence&gt;<span class="params">(<span class="number">_</span> xs: S)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; <span class="keyword">where</span> <span class="type">S</span>.<span class="type">Iterator</span>.<span class="type">Element</span> == <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> xs.<span class="built_in">reduce</span>(empty(), &#123; $<span class="number">0</span> &lt;|&gt; $<span class="number">1</span> &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">empty</span>&lt;A&gt;<span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; <span class="number">_</span> <span class="keyword">in</span> <span class="literal">nil</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Transform"><a href="#Transform" class="headerlink" title="Transform"></a>Transform</h2><p>上面利用 Protocol 实现的 <code>number</code> 和 <code>space</code> 解析器其实并不是很优雅，费了很大劲把 <code>many</code> 变得 <del>通用</del>，结果却并不是很 <strong>通用</strong>，因为要求结果的类型必须实现 <code>Combinable</code> 协议。但它做的工作却很少，只是把传入的 <code>Parser&lt;A&gt;</code> 循环解析得到的结果 <code>[A]</code> 在 <code>many</code> <strong>内部</strong> 组合成最终的类型，实现把 <code>Parser&lt;[A]</code> 转换为 <code>Parser&lt;B&gt;</code>。正由于它是在 <code>many</code> 内部做的操作，所以依赖于传入的类型，使得 <code>many</code> 不再那么通用。</p>
+<p>再看 <code>func character(_ character: Character) -&gt; Parser&lt;Character&gt;</code> 的定义，假如调用 <code>character(&quot;4&quot;)</code>，那么返回的是一个 <code>Parser&lt;Character&gt;</code> 类型的解析器，这个解析器调用 <code>parse</code> 方法，返回的结果是 <code>Character</code> 类型的值。在解析表达式 <code>4 + 3</code> 的时候，需要将解析到的 <code>4</code> 和 <code>3</code> 当作一个整数然后相加，才能得到最终的结果，所以不想要 <code>Character</code> 类型的值，而是想要 <code>Int</code> 类型的值，那么需要将 <code>Parser&lt;Character&gt;</code> 转换为 <code>Parser&lt;Int&gt;</code> 解析器。</p>
+<p>所以，假如能实现一个函数，可以将任意 <code>Parser&lt;A&gt;</code> 转换为 <code>Parser&lt;B&gt;</code> 解析器，就完美了。<code>many</code> 只负责将 <code>Parser&lt;A&gt;</code> 解析得到 <code>Parser&lt;[A]&gt;</code>，然后由 <code>number</code> 自己将 <code>Parser&lt;[A]&gt;</code> 转换为 <code>Parser&lt;Int&gt;</code>。</p>
+<h3 id="Functor"><a href="#Functor" class="headerlink" title="Functor"></a>Functor</h3><p>回忆 Swift 中 Optional 类型中的 map 方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a: <span class="type">Optional</span>&lt;<span class="type">Int</span>&gt; = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> b: <span class="type">Optional</span>&lt;<span class="type">String</span>&gt; = a.<span class="built_in">map</span> &#123; <span class="type">String</span>($<span class="number">0</span>) &#125;</span><br></pre></td></tr></table></figure>
+<p>它将一个 <code>Optional&lt;Int&gt;</code> 转换为 <code>Optional&lt;String&gt;</code>，仔细一看，把 <code>Optional</code> 换成 <code>Parser</code>，就是我们所需要的转换解析器的方法。</p>
+<p><code>Optional</code> 的函数签名是 <code>func map&lt;U&gt;(_ transform: (Wrapped) -&gt; U) -&gt; U?</code>，所以依葫芦画瓢，我们可以得到：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Parser</span>&lt;<span class="title">A</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">map</span>&lt;B&gt;<span class="params">(<span class="number">_</span> transform: <span class="params">(A)</span></span></span> -&gt; <span class="type">B</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = <span class="keyword">self</span>.parse(input) <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">nil</span> &#125;</span><br><span class="line">            <span class="keyword">return</span> (transform(result), remainder)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>像上面的 <code>satisfy</code> 和其他函数一样，把 <code>map</code> 方法从结构图内移出来，则得到：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">map</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> f: @escaping <span class="params">(A)</span></span></span> -&gt; <span class="type">B</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = x.parse(input)<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (f(result), remainder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于值是在 <code>Parser</code> 中包裹着的，想把返回的 <code>Parser&lt;Character</code> 变成 <code>Parser&lt;Int&gt;</code>，需要把 <code>Parser&lt;Character&gt;</code> 解开取出里面<character>的值，然后把它变成<int>类型，然后重现包装起来。对于不同的类型转换，解包重新包装的步骤是一样的，不同的地方是把结果从一种类型变成另一种类型，函数的作用就是把相同的封装起来，把不同做为参赛传进去，所以在 <code>map</code> 函数的实现中，只需要在返回前，给外部将这个结果进行一次转换机会，所以需要一个参赛，能够将解开后得到的值变成另一种类型的值，也就是提供一个函数 <code>(Character) -&gt; Int</code>。</int></character></p>
+<p>重新实现 <code>number</code> 和 <code>spaces</code>：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">number</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">Int</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">map</span>(many1(digit()), &#123; <span class="type">Int</span>(<span class="type">String</span>($<span class="number">0</span>))! &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">spaces</span><span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">map</span>(many(space()), &#123; <span class="type">String</span>($<span class="number">0</span>) &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两种不同的结构体 <code>Optional&lt;T&gt;</code> 和 <code>Parser&lt;A&gt;</code>，都可以给它实现一个 <code>map</code> 方法，使得它变成一个不同类型的结构体。而支持这种 <code>map</code> 方法的结构体，我们称把它为 <code>Functor</code>。</p>
+<blockquote>
+<p>简单来说，所谓的 <code>Functor</code> 就是可以把一个函数应用于一个 <strong>封装过的值</strong> 上，得到一个新的 <strong>封装过的值</strong></p>
+</blockquote>
+<p><code>Functor</code> 最早出自于代数拓扑，这里说的 <code>Functor</code> 一般是指范畴论（Category Theory）中的 <code>Functor</code>，它被用来描述各种范畴间的关系。更多 Functor 的理解 <a href="http://blessingsoft.com/2017/06/12/group-theory-and-category-theory/">Group Theory and Category Theory</a>。</p>
+<h3 id="Applicative"><a href="#Applicative" class="headerlink" title="Applicative"></a>Applicative</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">pure</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: A)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123; (x, $<span class="number">0</span>) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上前面的 <code>pure</code> 和 <code>discarding</code> 函数就是一种 Applicative。像 <code>discarding</code> 一样有时候只关心这些要解析道字符存在就行了，上面定义的 <code>discarding</code> 解析器作用是忽略第一个 parser 参数的解析结果，同样地，可以定义一个忽略第二个 parser 参数的解析器。比如当解析出现在右边的 symbol 的时候就很有用，<code>discarding2(parser, string(&quot;)&quot;))</code> 的作用就是确保存在闭合的右括号 “)”。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 吃掉右边的结果</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">discarding2</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result1, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 只保留左边的解析器的结果 result1，没有 result2</span></span><br><span class="line">        <span class="keyword">return</span> (result1, remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 吃掉左边的结果</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">discarding1</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (<span class="number">_</span>, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result2, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 只保留右边的解析器的结果 result2，没有 result1</span></span><br><span class="line">        <span class="keyword">return</span> (result2, remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这两个 <code>discarding</code> 函数长的很像，如果有办法把它们抽象一下，把相似的地方提取出来就好了。</p>
+<p>对于两个结果，忽略其中一个，实际上很简单：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 忽略 B</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> a: A, <span class="number">_</span> b: B)</span></span> -&gt; <span class="type">A</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 忽略 A</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> a: A, <span class="number">_</span> b: B)</span></span> -&gt; <span class="type">B</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 吃掉左边的结果</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">left</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;B&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">discarding</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> a: A, <span class="number">_</span> b: B)</span></span> -&gt; <span class="type">A</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> b</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result1, remainder1) = x.parse(input) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result2, remainder2) = y.parse(remainder1) <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (discarding(result1, result2), remainder2)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后这个函数并没有卵用。</p>
+<h3 id="Monad"><a href="#Monad" class="headerlink" title="Monad"></a>Monad</h3><p>观看 <code>map</code> 函数 <code>func map&lt;A, B&gt;(_ x: Parser&lt;A&gt;, _ f: (A) -&gt; B) -&gt; Parser&lt;B&gt;</code></p>
+<p>它要求传入两个参数，一个是 <code>Parser&lt;A&gt;</code>，一个是函数 <code>A -&gt; B</code>，第二个参数对标题中的 <strong>Combinator</strong> 并不是很友好，<strong>Parser Combinator</strong> 的思想是组合一系列的 <code>Parser</code> 得到结果。上面定义了有很多小的 parser，比如 <code>func string(_ str: String) -&gt; Parser&lt;String&gt;</code>，函数签名是 <code>(String) -&gt; Parser&lt;String&gt;</code>，由于 <code>map</code> 函数的第二个参数的签名是 <code>(A) -&gt; B</code>，而非 <code>(A) -&gt; Parser&lt;B&gt;</code>，所以假如存在一个与 <code>map</code> 功能相似，但第二个参数的签名是 <code>(A) -&gt; Parser&lt;B&gt;</code>，则能够使得之前定义的很多小的 <code>parser</code> 能够直接作为一个参数，直接得到一个新类型的 <code>Parser</code>，大概这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">flatMap</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> f: <span class="params">(A)</span></span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>使用的时候：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> parser = flatMap(stringParser, string(<span class="string">"alex"</span>))</span><br></pre></td></tr></table></figure>
+<p>具体实现与 <code>map</code> 也很像：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">flatMap</span>&lt;A, B&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> f: @escaping <span class="params">(A)</span></span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt;) -&gt; <span class="type">Parser</span>&lt;<span class="type">B</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> (result, remainder) = x.parse(input)<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> f(result).parse(remainder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="http://blessingsoft.com/2017/06/12/group-theory-and-category-theory/">Group Theory and Category Theory</a></p>
+<h3 id="Alternative"><a href="#Alternative" class="headerlink" title="Alternative"></a>Alternative</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">empty</span>&lt;A&gt;<span class="params">()</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; <span class="number">_</span> <span class="keyword">in</span> <span class="literal">nil</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">choice</span>&lt;A&gt;<span class="params">(<span class="number">_</span> x: Parser&lt;A&gt;, <span class="number">_</span> y: Parser&lt;A&gt;)</span></span> -&gt; <span class="type">Parser</span>&lt;<span class="type">A</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Parser</span> &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> x.parse(input) ?? y.parse(input)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Alternative 类似于 <code>Swift Standard Library</code> 中定义的运算符 <code>??</code>，它有两个同类型的参数，第一个参数是偏爱的 <code>parser</code>，第二个参数是默认的 <code>parser</code>。它首先尝试使用第一个 <code>parser</code> 来进行解析，如果成功，则返回。如果不成功，则使用默认的 <code>parser</code> 进行解析。它的返回值类型也是同类型的 <code>Parser</code>。</p>
+<p>作用是假如有 Int, String, Bool 三个类型的 <code>parser</code>，而一个 scalar 类型的 <code>parser</code> 只要能够解析 Int, String, Bool 任意一种类型，则算解析成功。换句话说就是 scalar 是 Int, String, Bool 的父集。一种简单的从 <code>Parser&lt;Int&gt;</code>, <code>Parser&lt;String&gt;</code>, <code>Parser&lt;Bool&gt;</code> 三种已有实现的 parser 得到 <code>Parser&lt;Scalar&gt;</code> 的方法是逐个进行 parse，如果成功则马上返回。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> scalar = parserInt &lt;|&gt; parserString &lt;|&gt; parserBool</span><br></pre></td></tr></table></figure>
+<p>从这个例子看有点 one of 的意思，但实际上更加准确的说法是 choice。</p>
+<h3 id="Applicative-amp-Monad"><a href="#Applicative-amp-Monad" class="headerlink" title="Applicative &amp; Monad"></a>Applicative &amp; Monad</h3><p>Applicative 和 Monad 的区别在于：</p>
+<p>Applicative 的两个 parser 是相互独立的，组合后的新 parser 是可以静态分析其行为的。而对于 Monad，在不知道输入的情况下，是不能确定其行为，也就是说 Monad 是依赖于计算结果。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">alex</span><span class="params">(<span class="number">_</span> x: Parser&lt;String&gt;)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> (<span class="number">_</span>, <span class="number">_</span>) = x.parse(<span class="string">"alex.huo"</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> af: <span class="type">Parser</span>&lt;(<span class="type">String</span>) -&gt; <span class="type">String</span>&gt; = pure(id)</span><br><span class="line"><span class="keyword">let</span> ax = string(<span class="string">"alex"</span>)</span><br><span class="line">alex(af &lt;*&gt; ax) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> mf: (<span class="type">String</span>) -&gt; <span class="type">Parser</span>&lt;<span class="type">String</span>&gt; = &#123; string($<span class="number">0</span>) &#125;</span><br><span class="line"><span class="keyword">let</span> mx = string(<span class="string">"alex"</span>)</span><br><span class="line">alex(mx &gt;&gt;- mf) <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://github.com/hlian/jiffy" target="_blank" rel="noopener">Jiffy</a><br><a href="https://news.realm.io/news/tryswift-yasuhiro-inami-parser-combinator/" target="_blank" rel="noopener">Parser combinators</a><br><a href="http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf" target="_blank" rel="noopener">Monadic Parser Combinators</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+            <a href="/tags/monad/" rel="tag"># monad</a>
+          
+            <a href="/tags/functional-programming/" rel="tag"># functional programming</a>
+          
+            <a href="/tags/parser/" rel="tag"># parser</a>
+          
+            <a href="/tags/parser-combinator/" rel="tag"># parser combinator</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/20/cherry-blessing/" rel="next" title="Cherry Blessing">
+                <i class="fa fa-chevron-left"></i> Cherry Blessing
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/12/group-theory-and-category-theory/" rel="prev" title="Group Theory and Category Theory">
+                Group Theory and Category Theory <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Xspyhack">
+          <p class="site-author-name" itemprop="name">Xspyhack</p>
+           
+              <p class="site-description motion-element" itemprop="description">Why join the navy if you can be a pirate?</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser"><span class="nav-number">1.</span> <span class="nav-text">Parser</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combinator"><span class="nav-number">2.</span> <span class="nav-text">Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parser-Combinator"><span class="nav-number">3.</span> <span class="nav-text">Parser Combinator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Next"><span class="nav-number">4.</span> <span class="nav-text">Next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combine"><span class="nav-number">5.</span> <span class="nav-text">Combine</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Many"><span class="nav-number">5.0.1.</span> <span class="nav-text">Many</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Skip"><span class="nav-number">5.0.2.</span> <span class="nav-text">Skip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Many1"><span class="nav-number">5.0.3.</span> <span class="nav-text">Many1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zip"><span class="nav-number">5.0.4.</span> <span class="nav-text">Zip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Choice"><span class="nav-number">5.0.5.</span> <span class="nav-text">Choice</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#Transform"><span class="nav-number">6.</span> <span class="nav-text">Transform</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Functor"><span class="nav-number">6.1.</span> <span class="nav-text">Functor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative"><span class="nav-number">6.2.</span> <span class="nav-text">Applicative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Monad"><span class="nav-number">6.3.</span> <span class="nav-text">Monad</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Alternative"><span class="nav-number">6.4.</span> <span class="nav-text">Alternative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicative-amp-Monad"><span class="nav-number">6.5.</span> <span class="nav-text">Applicative &amp; Monad</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">7.</span> <span class="nav-text">Ref</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xspyhack</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
