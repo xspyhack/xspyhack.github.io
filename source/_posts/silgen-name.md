@@ -1,5 +1,5 @@
 ---
-title: @_silgen_name
+title: _silgen_name
 date: 2022-07-16 20:00:00
 tags:
     - swift
