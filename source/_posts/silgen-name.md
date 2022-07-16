@@ -27,8 +27,7 @@ func user(context: Context) -> Bool {
 
 > 1. To specify the symbol name of a Swift function so that it can be called from Swift-aware C. Such functions have bodies.
 > 2. To provide a Swift declaration which really represents a C declaration. Such functions do not have bodies.
-> 
->  [swift/StandardLibraryProgrammersManual.md at main · apple/swift · GitHub](https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name)
+> [swift/StandardLibraryProgrammersManual.md](https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name)
 
 所以可以利用第2个特性给 `handler` 函数指定一个导出函数符号 `Exported Symbols`，然后通过将 `pattern` 作为导出符号即可绑定对应的 `handler` 函数。
 
