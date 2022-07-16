@@ -98,7 +98,7 @@
 <meta property="og:site_name" content="Cherry Blessing">
 <meta property="og:description" content="在设计 Router 组件的时候，其中必不可少的一步是路由注册，将 pattern 和 handler 函数进行绑定。  使用 @_silgen_name 来进行注册1234@_silgen_name(&quot;/user&quot;)func user(context: Context) -&amp;gt; Bool &amp;#123;    ...&amp;#125; 实现原理什么是 @silgen_name根据 Swift 的官">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2022-07-16T15:54:51.628Z">
+<meta property="og:updated_time" content="2022-07-16T15:56:43.358Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="silgen name">
 <meta name="twitter:description" content="在设计 Router 组件的时候，其中必不可少的一步是路由注册，将 pattern 和 handler 函数进行绑定。  使用 @_silgen_name 来进行注册1234@_silgen_name(&quot;/user&quot;)func user(context: Context) -&amp;gt; Bool &amp;#123;    ...&amp;#125; 实现原理什么是 @silgen_name根据 Swift 的官">
@@ -349,9 +349,7 @@
 <blockquote>
 <ol>
 <li>To specify the symbol name of a Swift function so that it can be called from Swift-aware C. Such functions have bodies.</li>
-<li><p>To provide a Swift declaration which really represents a C declaration. Such functions do not have bodies.</p>
-<p><a href="https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name" target="_blank" rel="noopener">swift/StandardLibraryProgrammersManual.md at main · apple/swift · GitHub</a></p>
-</li>
+<li>To provide a Swift declaration which really represents a C declaration. Such functions do not have bodies.<br><a href="https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name" target="_blank" rel="noopener">swift/StandardLibraryProgrammersManual.md</a></li>
 </ol>
 </blockquote>
 <p>所以可以利用第2个特性给 <code>handler</code> 函数指定一个导出函数符号 <code>Exported Symbols</code>，然后通过将 <code>pattern</code> 作为导出符号即可绑定对应的 <code>handler</code> 函数。</p>
