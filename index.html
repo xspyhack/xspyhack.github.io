@@ -255,6 +255,168 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2022/07/16/silgen-name/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/07/16/silgen-name/" itemprop="url">_silgen_name</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-07-16T20:00:00+08:00">
+                2022-07-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/advanced-swift/" itemprop="url" rel="index">
+                    <span itemprop="name">advanced swift</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <blockquote>
+<p>在设计 <code>Router</code> 组件的时候，其中必不可少的一步是路由注册，将 <code>pattern</code> 和 <code>handler</code> 函数进行绑定。</p>
+</blockquote>
+<h2 id="使用-silgen-name-来进行注册"><a href="#使用-silgen-name-来进行注册" class="headerlink" title="使用 @_silgen_name 来进行注册"></a>使用 @_silgen_name 来进行注册</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@_silgen_name(<span class="string">"/user"</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">user</span><span class="params">(context: Context)</span></span> -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><h3 id="什么是-silgen-name"><a href="#什么是-silgen-name" class="headerlink" title="什么是 @silgen_name"></a>什么是 @silgen_name</h3><p>根据 Swift 的官方手册，<code>@silgen_name</code> 有两个作用：</p>
+<blockquote>
+<ol>
+<li>To specify the symbol name of a Swift function so that it can be called from Swift-aware C. Such functions have bodies.</li>
+<li><p>To provide a Swift declaration which really represents a C declaration. Such functions do not have bodies.</p>
+<p><a href="https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name" target="_blank" rel="noopener">swift/StandardLibraryProgrammersManual.md at main · apple/swift · GitHub</a></p>
+</li>
+</ol>
+</blockquote>
+<p>所以可以利用第2个特性给 <code>handler</code> 函数指定一个导出函数符号 <code>Exported Symbols</code>，然后通过将 <code>pattern</code> 作为导出符号即可绑定对应的 <code>handler</code> 函数。</p>
+<p>同时为了避免与其它导出符号冲突并且提高查找的效率，可以给导出符号加一个约定的前缀，如 <code>ditto:</code>。</p>
+<h3 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h3><p>运行时利用 <code>_dyld_register_func_for_add_image()</code> 来监听所有的 <code>image</code> 加载，然后遍历带特定前缀的导出函数符号。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_dyld_register_func_for_add_image &#123; image, slide <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">let</span> mhp = image?.withMemoryRebound(to: <span class="type">MachHeader</span>.<span class="keyword">self</span>, capacity: <span class="number">1</span>, &#123; $<span class="number">0</span> &#125;)</span><br><span class="line">    <span class="keyword">let</span> symbols = getDyldRouteSymbols(<span class="keyword">prefix</span>: <span class="string">"ditto:"</span>, image: mhp!, slide: slide)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后通过 <code>unsafeBitCast(_:to:)</code> 函数将函数符号转为 <code>handler</code> 函数进行注册。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> routes: [(<span class="type">String</span>, <span class="type">Route</span>&lt;<span class="type">Coordinator</span>&gt;.<span class="type">Handler</span>)] = symbols</span><br><span class="line">    .<span class="built_in">filter</span> &#123; $<span class="number">0</span>.key.hasPrefix(<span class="string">"ditto:"</span>) &#125;</span><br><span class="line">    .<span class="built_in">map</span> &#123; (<span class="type">String</span>($<span class="number">0</span>.key.<span class="built_in">dropFirst</span>(<span class="string">"ditto:"</span>.<span class="built_in">count</span>)), <span class="built_in">unsafeBitCast</span>($<span class="number">0</span>.value, to: <span class="type">Handler</span>.<span class="keyword">self</span>)) &#125;</span><br><span class="line"><span class="keyword">try</span>? register(routes)</span><br></pre></td></tr></table></figure>
+<h2 id="进阶"><a href="#进阶" class="headerlink" title="进阶"></a>进阶</h2><p><a href="https://github.com/xspyhack/Ditto" target="_blank" rel="noopener">Ditto</a> 在设计之初便支持范型，并且可以同时存在多个 <code>Router</code>（虽然没太必要）。</p>
+<h3 id="范型"><a href="#范型" class="headerlink" title="范型"></a>范型</h3><p><code>_dyld_register_func_for_add_image()</code> 是一个 <code>C</code> 函数，支持传入一个回调函数指针作为参数，定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _dyld_register_func_for_add_image(<span class="keyword">void</span> (*func)(<span class="keyword">const</span> struct mach_header* mh, <span class="keyword">intptr_t</span> vmaddr_slide));</span><br></pre></td></tr></table></figure>
+<p>回调函数并不同于一般的 <code>closure</code>，它不能捕获上下文信息：<code>A C function pointer cannot be formed from a closure that captures context</code>。所以对于支持范型的 <code>Router</code> 来说，就不能直接的调用这个函数。</p>
+<p>所以我们需要用过一些其他手段先把遍历到的函数符号先存起来，再重新读取出来即可。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SIL</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span>(<span class="keyword">set</span>) <span class="keyword">var</span> symbols: [<span class="type">UnsafeMutableRawPointer?</span>] = []</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> shared = <span class="type">SIL</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">install</span><span class="params">()</span></span> &#123;</span><br><span class="line">        _dyld_register_func_for_add_image &#123; image, slide <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> mhp = image?.withMemoryRebound(to: <span class="type">MachHeader</span>.<span class="keyword">self</span>, capacity: <span class="number">1</span>, &#123; $<span class="number">0</span> &#125;)</span><br><span class="line">            <span class="keyword">let</span> symbols = getDyldRouteSymbols(image: mhp!, slide: slide)</span><br><span class="line">            <span class="type">SIL</span>.shared.symbols.append(contentsOf: symbols)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Router</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Handler</span> = <span class="meta">@convention</span>(thin) (<span class="type">Context</span>&lt;<span class="type">Coordinator</span>&gt;) -&gt; <span class="type">Bool</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">register</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">SIL</span>.install()</span><br><span class="line">        <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">            <span class="keyword">self</span>.register(symbols: <span class="type">SIL</span>.shared.symbols)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">func</span> <span class="title">register</span><span class="params">(symbols: [UnsafeMutableRawPointer?])</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> routes: [(<span class="type">String</span>, <span class="type">Route</span>&lt;<span class="type">Coordinator</span>&gt;.<span class="type">Handler</span>)] = symbols</span><br><span class="line">            .<span class="built_in">map</span> &#123; (<span class="type">String</span>($<span class="number">0</span>.key), <span class="built_in">unsafeBitCast</span>($<span class="number">0</span>.value, to: <span class="type">Handler</span>.<span class="keyword">self</span>)) &#125;</span><br><span class="line">        <span class="keyword">try</span>? register(routes)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="模块化"><a href="#模块化" class="headerlink" title="模块化"></a>模块化</h3><p>假如同时存在多个 <code>Router</code> 的话，那么只靠 <code>pattern</code> 无法区分要注册到哪一个。同时由于 <code>_dyld_register_func_for_add_image()</code> 函数无法捕获上下文，也无法传递指定的 <code>silgen_name</code> 前缀来进行分开遍历。</p>
+<p>一个可行但并不优雅的方法依然是在 <code>silgen_name</code> 的命名中做文章，如约定特殊的前缀来进行区分。</p>
+<p>如果不同的 <code>Router</code> 是在不同的模块中（<code>module</code>），那么可以通过遍历指定的 <code>image</code> （通过 <code>_dyld_get_image_name()</code> 方法）来注册当前模块的符号。</p>
+<p><a href="https://github.com/apple/swift/blob/main/docs/StandardLibraryProgrammersManual.md#_silgen_name" target="_blank" rel="noopener">swift/StandardLibraryProgrammersManual.md</a><br><a href="https://forums.swift.org/t/should-anyone-be-using-silgen-name-outside-of-the-standard-library-developers/19396/23" target="_blank" rel="noopener">Should anyone be using @_silgen_name outside of the standard library developers?</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2022/01/01/some-any/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2465,7 +2627,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2487,7 +2649,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
