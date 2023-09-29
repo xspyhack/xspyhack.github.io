@@ -1,0 +1,783 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="swift,existential,protocol,generic,pats,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="最初看到 existential 这个词，是在 Swift Associated Types, cont. 这篇文章中（第一次知道 typealias Any = protocol&amp;lt;&amp;gt; 也是在这篇文章），但当时并没有对这个陌生名称留下什么深刻印象。 后来陆陆续续应该也看到过一些，比如 Understanding Swift Performance - WWDC 2016。 真正的想要去">
+<meta name="keywords" content="swift,existential,protocol,generic,pats">
+<meta property="og:type" content="article">
+<meta property="og:title" content="∃ Existential">
+<meta property="og:url" content="https://blessingsoft.com/2019/06/05/existential/index.html">
+<meta property="og:site_name" content="Cherry Blessing">
+<meta property="og:description" content="最初看到 existential 这个词，是在 Swift Associated Types, cont. 这篇文章中（第一次知道 typealias Any = protocol&amp;lt;&amp;gt; 也是在这篇文章），但当时并没有对这个陌生名称留下什么深刻印象。 后来陆陆续续应该也看到过一些，比如 Understanding Swift Performance - WWDC 2016。 真正的想要去">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2023-09-29T09:25:51.987Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="∃ Existential">
+<meta name="twitter:description" content="最初看到 existential 这个词，是在 Swift Associated Types, cont. 这篇文章中（第一次知道 typealias Any = protocol&amp;lt;&amp;gt; 也是在这篇文章），但当时并没有对这个陌生名称留下什么深刻印象。 后来陆陆续续应该也看到过一些，比如 Understanding Swift Performance - WWDC 2016。 真正的想要去">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blessingsoft.com/2019/06/05/existential/">
+
+
+
+
+
+  <title>∃ Existential | Cherry Blessing</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cherry Blessing</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">A monad is a monoid in the category of endofunctors</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2019/06/05/existential/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">∃ Existential</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-05T20:00:00+08:00">
+                2019-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/advanced-swift/" itemprop="url" rel="index">
+                    <span itemprop="name">advanced swift</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最初看到 <strong>existential</strong> 这个词，是在 <a href="http://www.russbishop.net/swift-associated-types-cont" target="_blank" rel="noopener">Swift Associated Types, cont.</a> 这篇文章中（第一次知道 <code>typealias Any = protocol&lt;&gt;</code> 也是在这篇文章），但当时并没有对这个陌生名称留下什么深刻印象。</p>
+<p>后来陆陆续续应该也看到过一些，比如 <a href="https://developer.apple.com/videos/play/wwdc2016/416/" target="_blank" rel="noopener">Understanding Swift Performance - WWDC 2016</a>。</p>
+<p>真正的想要去了解它，是之前写 <a href="http://blessingsoft.com/2018/08/26/pats/">PATs</a> 的时候，那时候 <strong>existential</strong> 这个词很高频的出现，甚至是和 PATs 息息相关，所以进行了一个初步的了解。</p>
+<p>但是呢，只是片面的了解，而没有建立起立体的认识，记忆很快就会开始模糊，直到最后忘记掉。所以才有了这次的 <strong>existential</strong> 认知之旅。</p>
+<blockquote>
+<p>注：这篇大多数概念、观点、片段都来自于官方文档或者参考文章，小部分自己的认知理解，并且不保证理解的正确。</p>
+</blockquote>
+<h2 id="Existential-Type"><a href="#Existential-Type" class="headerlink" title="Existential Type"></a>Existential Type</h2><p>想理解 <strong>existential</strong>，必须要先了解 <strong>existential values</strong>, <strong>existential containers</strong> 和 <strong>witness tables</strong> 的概念。</p>
+<p>在类型论中， <a href="https://en.wikipedia.org/wiki/Type_system#Existential_types" target="_blank" rel="noopener">existential type</a> 描述了抽象类型的接口。当对象的类型是 <code>protocol</code> 时，就会用到 <strong>existential type</strong>，因为存储或传递一个 <code>protocol</code> 类型的对象意味着对象在运行时的真实类型是不透明的（也就是编译期不可知的，因此我们也无法确定这类对象的布局）。</p>
+<p>一个遵从了特定 <code>protocol</code> 的类型一定包含其约定的所有方法，但是这些方法的地址是无法在编译期确定的，因为我们只有在运行时，才能确定这个 <code>protocol</code> 对应的真实类型。这和 <code>non-final class</code> 引用是类似的（因为可能被 override），因此也使用了 <a href="https://github.com/apple/swift/blob/master/docs/ABIStabilityManifesto.md#method-dispatch" target="_blank" rel="noopener">类似的技术手段</a> 来解决。<code>Protocol</code> 中约定的每一个被实现的方法的地址，都被保存在 <strong>witness table</strong> 中。</p>
+<h3 id="Existential-Value"><a href="#Existential-Value" class="headerlink" title="Existential Value"></a>Existential Value</h3><p>显然的，<strong>existential type</strong> 的值，就是 <strong>existential value</strong>。:P</p>
+<h3 id="Existential-Container"><a href="#Existential-Container" class="headerlink" title="Existential Container"></a>Existential Container</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Foo</span> </span>&#123;&#125;</span><br><span class="line"><span class="keyword">let</span> foos: [<span class="type">Foo</span>] = ... <span class="comment">// What's the memory storage looks like?</span></span><br></pre></td></tr></table></figure>
+<p>简单来说 <strong>existential of a protocol</strong> 就是一个编译器生成的盒子 box，用来存放遵从这个 <code>protocol</code> 的值，这个盒子，也叫做 <strong>Existential Container</strong>，盒子里面的东西，就叫做 <strong>witness</strong>。</p>
+<p>关于 <strong>existential container</strong> 的内存布局，这些值怎么存储，要分几种情况来说。因为值类型和引用类型的处理方式不一样，值比较小和比较大也可以为了性能用不同的策略。<a href="https://developer.apple.com/videos/play/wwdc2016/416/" target="_blank" rel="noopener">Understanding Swift Performance - WWDC 2016</a> 和 <a href="https://github.com/apple/swift/blob/master/docs/ABIStabilityManifesto.md" target="_blank" rel="noopener">ABIStabilityManifesto · GitHub</a> 中都有详细的描述。</p>
+<p>简单来说就是 5 个字节的大小，前三个连续的字节叫做 <em>value buffer</em>，用来存放对象的值或者指针。值类型如果放得下，就直接内联放在 <em>value buffer</em> 里面，如果放不下，就在存放在堆上，把指针地址存放在 <em>value buffer</em> 里；引用类型直接放指针。<br>第四个字节存放 <code>vwt</code> (<em>value witness table</em>) 指针。<br>第五个字节存放 <code>pwt</code> (<em>protocol witness table</em>) 指针。</p>
+<p>对于那些限定了只能是 <code>class</code> 实现的 <code>protocol</code>，<code>containers</code> 中则会忽略 <code>vwt</code> 指针（因为对象自身包含指向自己类型信息的指针）以及多余的内连 buffer。并且，这里还有一个特例 <code>Any</code>，由于它没有遵从任何 <code>protocol</code>，因此 <code>Any</code> 对象的 <code>containers</code> 中没有 <em>witness table</em> 指针。（没错，<code>Any</code> 也是一个 <strong>existential</strong> ！即使 Swift 3 之后把 <code>Any</code> 当作了 keyword，但估计和之前的 <code>protocol &lt;&gt;</code> 差不多的实现，所以依然是 <strong>existential</strong> 。）</p>
+<h3 id="VWT"><a href="#VWT" class="headerlink" title="VWT"></a>VWT</h3><p>每一个具体类型（concrete type）都有一张 <em>value witness table</em>，用来存放这个类型的有关内存布局和操作它的值的信息。当一个值类型具有不透明布局的时候，因为值编译的时候没办法知道实际类型，所以只能通过查询这个表来知道这些有关信息（metadata）。</p>
+<h3 id="PWT"><a href="#PWT" class="headerlink" title="PWT"></a>PWT</h3><p><em>Protocol witness table</em> 是 <code>protocol</code> 接口的一张函数表。如果有 associated type，它还会存储 associated type 的 metadata。</p>
+<blockquote>
+<p>所以什么是 <strong>existential</strong> 是什么？就是一个 <code>protocol</code> 类型的值。</p>
+</blockquote>
+<h2 id="Protocol"><a href="#Protocol" class="headerlink" title="Protocol"></a>Protocol</h2><p>当一个 <code>protocol</code> 作为类型而不是具体的类型约束的时候，它就是一个 <strong>existential</strong>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Foo</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bar</span>&lt;T: Foo&gt;<span class="params">(<span class="number">_</span> foo: T)</span></span> &#123;&#125; <span class="comment">// This requires a concrete T that conforms to Foo</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">baz</span><span class="params">(<span class="number">_</span> foo: Foo)</span></span> &#123;&#125; <span class="comment">// This requires a variable of type Foo (pedantically: "a Foo existential")</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> foo: <span class="type">Foo</span> = ... <span class="comment">// existential of protocol `Foo`</span></span><br><span class="line">bar(foo) <span class="comment">// 😢 Protocol type 'Foo' cannot conform to 'Foo' because only concrete types can conform to protocols</span></span><br><span class="line">baz(foo) <span class="comment">// 😊</span></span><br></pre></td></tr></table></figure>
+<p>所以当看到 “a protocol doesn’t conform to itself” 的时候，它实际上是指 “the existential of a protocol doesn’t conform to that protocol”。 </p>
+<h2 id="Generic"><a href="#Generic" class="headerlink" title="Generic"></a>Generic</h2><p><strong>Existentials</strong> 不是真正的泛型（<code>generic</code>），但由于它们相互依赖于 <code>protocol</code>，这两个系统紧密地交织在一起。</p>
+<blockquote>
+<p>While protocols create existential (“there exists”) types, generics create universal (“for all”) types. </p>
+</blockquote>
+<p>先回顾一下泛型的一些常见概念：</p>
+<ul>
+<li>泛型函数 <code>func swap&lt;T&gt;(_ a: inout T, _ b: inout T)</code></li>
+<li>类型参数 <code>&lt;T&gt;</code></li>
+<li>泛型类型 <code>Queue&lt;T&gt;</code></li>
+<li>类型约束 <code>&lt;T: Protocol, U: Class&gt;</code></li>
+<li>关联类型 <code>associatedtype T</code></li>
+<li>泛型从句 <code>func foo&lt;T: P, U: P&gt;(_ a: T, _ b: T) where T: Equatable, T.Item == U.Item</code></li>
+</ul>
+<p>当使用泛型作为类型约束的时候，会涉及到 <strong>existentials</strong>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bar</span>&lt;T: Foo&gt;<span class="params">(<span class="number">_</span> foo: T)</span></span> &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> foo: <span class="type">Foo</span> = ...</span><br><span class="line">bar(foo) <span class="comment">// Protocol type 'Foo' cannot conform to 'Foo' because only concrete types can conform to protocols</span></span><br></pre></td></tr></table></figure>
+<h2 id="PATs"><a href="#PATs" class="headerlink" title="PATs"></a>PATs</h2><p>既然有 <strong>existentials</strong> 了，那为什么还需要 <strong>type eraser</strong> 呢？</p>
+<p>先回过头来看看之前在 <a href="http://blessingsoft.com/2018/08/26/pats/">PATs</a> 中遇到的几个问题。</p>
+<blockquote>
+<p>Protocol ‘Caching’ can only be used as generic constraint because it has Self or associated type requirements</p>
+</blockquote>
+<p>它的意思是，<code>Caching</code>  这个 PATs 没有（无法自动生成）一个 <strong>existential</strong>.</p>
+<blockquote>
+<p>Using ‘Logging’ as a concrete type conforming to protocol ‘Hashable’ is no supported</p>
+</blockquote>
+<p>它的意思是，这个 <code>Logging</code> 的 <strong>existential</strong> 没有实现 <code>Hashable</code> 这个协议。</p>
+<p>为什么无法为 PATs 生成一个 <strong>existential</strong> 呢？实际上是可以的，但它很复杂。它可以通过一种叫做 <strong>generalized existentials</strong> 的技术，生成一个 <strong>implicit existential</strong>。即使这样，它还有很多问题需要解决。</p>
+<p>对于 <strong>existential</strong> 的自动生成，首先 <strong>existential</strong> 是运行时的（泛型 <code>generic</code> 是编译时的），它是通过在运行时，把 <code>protocol</code> 的一些信息存放在 <strong>existential container</strong> 里面。当 <code>protocol</code> 里面存在有 <em>associated types</em> 或者有 <code>Self</code> 约束的时候，它没办法针对任意类型（Any）自动生成填充这个 <strong>existential container</strong>。（Swift 是静态语言，对于泛型需要在编译时就进行泛型特化，<strong>generic specialization</strong>，除非把泛型当作是 <code>Any</code> 来处理。还有一种方式就是对 PATs 进行约束，<code>let strings: Any&lt;Sequence where .Iterator.Element == String&gt; = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code>，也就是 <code>AnySequence&lt;String&gt;</code> ）</p>
+<p>理解这一点非常重要，可能会有点晕，再来捋一下。首先编译器把存储或者传递的  <code>protocol</code> 类型，先替换成 <code>existential container</code>（生成代码），然后再编译成目标代码。当编译器发现这个 <code>protocol</code> 是 PATs 时，它如果不通过 <em>generic specialization</em> 的话，无法生成不带泛型的代码。那为什么说 <strong>existential</strong> 是运行时的呢？因为存储或传递一个 <code>protocol</code> 类型的对象意味着对象在运行时的真实类型是不透明的（也就是编译期不可知的，因此我们也无法确定这类对象的布局）。</p>
+<p>还有一些类型是不适合自动生成 <strong>existential</strong> 的，编译器没法满足有 <code>init</code> 和 <code>static</code> 的要求。比如 <code>Decodable</code> 这样的没有实例方法的协议，<strong>existential</strong> 没有任何意义。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">Decodable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">init</span>(from decoder: <span class="type">Decoder</span>) <span class="keyword">throws</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Model</span>: <span class="title">Decodable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> x: <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">decode</span><span class="params">(<span class="number">_</span> decodable: Decodable)</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> decodable: <span class="type">Decodable</span> = <span class="type">Model</span>(x: <span class="string">"x"</span>)</span><br><span class="line">decode(decodable)</span><br><span class="line"><span class="comment">// 上面对代码编译起来没有任何问题，也就是能自动生成 *existential*</span></span><br><span class="line"><span class="comment">// 但对于 decode(_:) 函数，根本无从下手，因为 Decoder 需要的是一个遵守 Decodable 协议的类型，而不是值。</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">decode</span><span class="params">(<span class="number">_</span> type: Decodable.<span class="keyword">Type</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">let</span> decodable = <span class="type">JSONDecoder</span>().decode(type, from: data)</span><br><span class="line">    <span class="comment">// let decodable = JSONDecoder().decode(Decodable.self, from: data)</span></span><br><span class="line">    <span class="comment">// Protocol type 'Decodable' cannot conform to 'Decodable' because only concrete types can conform to protocols</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 最终还是那个 `Protocol type 'Decodable' cannot conform to 'Decodable' because only concrete types can conform to protocols`</span></span><br></pre></td></tr></table></figure>
+<p>其实 <strong>type eraser</strong> 和 <strong>existentials</strong> 这两种是对偶的（ duals ），泛型（ generic ）的 <code>Any&lt;T&gt;</code> 等同于 协议（ protocol ）的一种 <strong>explicit existential</strong>。</p>
+<h2 id="Existential-in-Other-Language"><a href="#Existential-in-Other-Language" class="headerlink" title="Existential in Other Language"></a>Existential in Other Language</h2><h3 id="Existential-type-in-Java"><a href="#Existential-type-in-Java" class="headerlink" title="Existential type in Java"></a>Existential type in Java</h3><p>Java 泛型中的 <strong>Wildcards</strong> 其实就是一种 existential type，比如 <code>java.util.List&lt;?&gt;</code>。</p>
+<p>在 Java 中由于有<a href="h">类型擦除</a> 的存在，泛型的参数类型信息在运行时会丢失，在运行时无法根据已知的类型信息区分 <code>List[Int]</code> 和 <code>List[String]</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List foo = <span class="keyword">new</span> ArrayList();</span><br><span class="line">foo.add(<span class="string">"foo"</span>);</span><br><span class="line">foo.get(<span class="number">0</span>); <span class="comment">// "foo"</span></span><br></pre></td></tr></table></figure>
+<p>当没有给出类型参数的时候，通过使用 existential 来解决。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;?&gt;</span><br><span class="line">List&lt;? extends Number&gt;</span><br><span class="line">List&lt;? <span class="keyword">super</span> Integer&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="Existential-type-in-Kotlin"><a href="#Existential-type-in-Kotlin" class="headerlink" title="Existential type in Kotlin"></a>Existential type in Kotlin</h3><p>Kotlin 中没有 <strong>existential type</strong>。它有一个概念叫着 <strong>The Existential</strong> 的概念。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Animal</span></span>()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span></span>()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> dogBar: Bar&lt;Dog&gt; = Bar()</span><br><span class="line"><span class="keyword">var</span> animalBar: Bar&lt;Animal&gt; = dogBar <span class="comment">// 😢</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span>&lt;<span class="type">out T</span>&gt; </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> dogBar: Bar&lt;Dog&gt; = Bar()</span><br><span class="line"><span class="keyword">var</span> animalBar: Bar&lt;Animal&gt; = dogBar <span class="comment">// 😊</span></span><br></pre></td></tr></table></figure>
+<h3 id="Existential-type-in-Scala"><a href="#Existential-type-in-Scala" class="headerlink" title="Existential type in Scala"></a>Existential type in Scala</h3><p><code>ArrayList() == List[]</code></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Trait</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>(seq: <span class="type">Seq</span>[<span class="type">String</span>]): <span class="type">Seq</span>[<span class="type">String</span>]</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>(seq: <span class="type">Seq</span>[<span class="type">Int</span>]): <span class="type">Seq</span>[<span class="type">Int</span>]</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Error, have the same type after erasure</span></span><br><span class="line"></span><br><span class="line"><span class="type">List</span>[_] <span class="comment">// List[T] forSome &#123; type T &#125;</span></span><br><span class="line"><span class="class"><span class="keyword">trait</span> <span class="title">List</span>[+<span class="type">T</span>]</span></span><br></pre></td></tr></table></figure>
+<h3 id="Existential-type-in-Rust"><a href="#Existential-type-in-Rust" class="headerlink" title="Existential type in Rust"></a>Existential type in Rust</h3><p> <code>fn foo() -&gt; impl Trait</code></p>
+<p>核心在于 <code>impl Trait</code>，和 Swift 5.1 <a href="https://github.com/apple/swift-evolution/blob/master/proposals/0244-opaque-result-types.md" target="_blank" rel="noopener">Opaque Result Types</a> 中的 <code>func foo() -&gt; some P</code> 一样。</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p><strong>Existential</strong> 是什么？<strong>Existential</strong> 就是 <code>protocol</code> 类型的值。这是编译层面相关的概念，平时写代码不需要知道它意味着什么或者是什么，只需要知道它会跟你想象中一样 work 就行了。</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="http://www.russbishop.net/swift-associated-types-cont" target="_blank" rel="noopener">Swift Associated Types, cont. - Russ Bishop</a><br><a href="https://github.com/apple/swift/blob/master/docs/ABIStabilityManifesto.md" target="_blank" rel="noopener">ABIStabilityManifesto · GitHub</a><br><a href="https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md" target="_blank" rel="noopener">GenericsManifesto · GitHub</a><br><a href="https://forums.swift.org/t/improving-the-ui-of-generics/22814" target="_blank" rel="noopener">Improving the UI of generics - Swift Forums</a><br><a href="http://robnapier.net/existential-spelling" target="_blank" rel="noopener">Protocols III: Existential Spelling - Cocoaphony</a><br><a href="https://en.wikipedia.org/wiki/Type_system#Existential_types" target="_blank" rel="noopener">Existential types - Wikipedia</a><br><a href="https://developer.apple.com/videos/play/wwdc2016/416/" target="_blank" rel="noopener">Understanding Swift Performance - WWDC 2016</a><br><a href="https://github.com/apple/swift-evolution/blob/master/proposals/0244-opaque-result-types.md" target="_blank" rel="noopener">0244-opaque-result-types - GitHub</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+            <a href="/tags/existential/" rel="tag"># existential</a>
+          
+            <a href="/tags/protocol/" rel="tag"># protocol</a>
+          
+            <a href="/tags/generic/" rel="tag"># generic</a>
+          
+            <a href="/tags/pats/" rel="tag"># pats</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/19/from-result-to-error-handling/" rel="next" title="From Result to Error Handling">
+                <i class="fa fa-chevron-left"></i> From Result to Error Handling
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/01/01/some-any/" rel="prev" title="some P and any P">
+                some P and any P <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Xspyhack">
+          <p class="site-author-name" itemprop="name">Xspyhack</p>
+           
+              <p class="site-description motion-element" itemprop="description">Why join the navy if you can be a pirate?</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Existential-Type"><span class="nav-number">1.</span> <span class="nav-text">Existential Type</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-Value"><span class="nav-number">1.1.</span> <span class="nav-text">Existential Value</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-Container"><span class="nav-number">1.2.</span> <span class="nav-text">Existential Container</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VWT"><span class="nav-number">1.3.</span> <span class="nav-text">VWT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PWT"><span class="nav-number">1.4.</span> <span class="nav-text">PWT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol"><span class="nav-number">2.</span> <span class="nav-text">Protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Generic"><span class="nav-number">3.</span> <span class="nav-text">Generic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PATs"><span class="nav-number">4.</span> <span class="nav-text">PATs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Existential-in-Other-Language"><span class="nav-number">5.</span> <span class="nav-text">Existential in Other Language</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-type-in-Java"><span class="nav-number">5.1.</span> <span class="nav-text">Existential type in Java</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-type-in-Kotlin"><span class="nav-number">5.2.</span> <span class="nav-text">Existential type in Kotlin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-type-in-Scala"><span class="nav-number">5.3.</span> <span class="nav-text">Existential type in Scala</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Existential-type-in-Rust"><span class="nav-number">5.4.</span> <span class="nav-text">Existential type in Rust</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">7.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xspyhack</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

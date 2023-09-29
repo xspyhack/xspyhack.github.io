@@ -1,0 +1,762 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="swift,existential,protocol,generic,pats,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="TL;DR some 是另一种特殊的 generic（符合要求的未知但具体的类型）。它的目的是用来对复杂的类型进行抽象，类型的信息不会被擦除。 any 其实是显式的声明 existential。它的目的是用来对值进行抽象，类型信息会被 compiler 擦除。  some Protocol写过 SwiftUI 的人对于 some 都不陌生，每一个 View 的 body 的类型都是 some Vi">
+<meta name="keywords" content="swift,existential,protocol,generic,pats">
+<meta property="og:type" content="article">
+<meta property="og:title" content="some P and any P">
+<meta property="og:url" content="https://blessingsoft.com/2022/01/01/some-any/index.html">
+<meta property="og:site_name" content="Cherry Blessing">
+<meta property="og:description" content="TL;DR some 是另一种特殊的 generic（符合要求的未知但具体的类型）。它的目的是用来对复杂的类型进行抽象，类型的信息不会被擦除。 any 其实是显式的声明 existential。它的目的是用来对值进行抽象，类型信息会被 compiler 擦除。  some Protocol写过 SwiftUI 的人对于 some 都不陌生，每一个 View 的 body 的类型都是 some Vi">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2023-09-29T09:25:51.988Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="some P and any P">
+<meta name="twitter:description" content="TL;DR some 是另一种特殊的 generic（符合要求的未知但具体的类型）。它的目的是用来对复杂的类型进行抽象，类型的信息不会被擦除。 any 其实是显式的声明 existential。它的目的是用来对值进行抽象，类型信息会被 compiler 擦除。  some Protocol写过 SwiftUI 的人对于 some 都不陌生，每一个 View 的 body 的类型都是 some Vi">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blessingsoft.com/2022/01/01/some-any/">
+
+
+
+
+
+  <title>some P and any P | Cherry Blessing</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cherry Blessing</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">A monad is a monoid in the category of endofunctors</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2022/01/01/some-any/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">some P and any P</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-01T20:00:00+08:00">
+                2022-01-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/advanced-swift/" itemprop="url" rel="index">
+                    <span itemprop="name">advanced swift</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="TL-DR"><a href="#TL-DR" class="headerlink" title="TL;DR"></a>TL;DR</h2><ul>
+<li><code>some</code> 是另一种特殊的 <code>generic</code>（符合要求的未知但具体的类型）。它的目的是用来对复杂的类型进行抽象，类型的信息不会被擦除。</li>
+<li><code>any</code> 其实是显式的声明 <code>existential</code>。它的目的是用来对值进行抽象，类型信息会被 compiler 擦除。</li>
+</ul>
+<h2 id="some-Protocol"><a href="#some-Protocol" class="headerlink" title="some Protocol"></a>some Protocol</h2><p>写过 SwiftUI 的人对于 <code>some</code> 都不陌生，每一个 <code>View</code> 的 <code>body</code> 的类型都是 <code>some View</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ContentView</span>: <span class="title">View</span> </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> body: some <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">"Hello World"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为什么需要引进一个新的关键词 <code>some</code>，不能直接写 <code>var body: View { ... }</code>？原因是 <code>View</code> 这个协议是经典的 <em>PAT</em>，对就是那个万恶之源 <a href="https://blessingsoft.com/2018/08/26/pats/">PAT</a> 。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">View</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Body</span> : <span class="type">View</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="type">Self</span>.<span class="type">Body</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于 <code>PAT</code> 不能直接的把 <code>View</code> 当作一个类型来使用，<code>Protocol ‘View’ can only be used as generic constraint because it has Self or associated type requirements</code>。<code>View</code> 这个 <code>PAT</code> 没法自动生成一个 <a href="https://blessingsoft.com/2019/06/05/existential/">Existential</a>，所以不能直接写 <code>var body: View { ... }</code>，必须明确指定 <code>View</code> 的具体类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ContentView</span>: <span class="title">View</span> </span>&#123;</span><br><span class="line">  <span class="comment">// typealias Body = Text</span></span><br><span class="line">  <span class="keyword">var</span> body: <span class="type">Text</span> &#123;</span><br><span class="line">    <span class="type">Text</span>(<span class="string">"Hello World"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>明确 <code>Body</code> 的具体类型，有助于揭示 <code>ContentView</code> 的部分实现，同时也使得声明变得脆弱。如果想改变 <code>body</code> 的返回类型，必须同时修改对应的类型。在这个场景中，具体的 <code>body</code> 返回类型其实并不重要，重要的是它符合 <code>View</code> 协议，它是一个 <code>View</code>。这时候如果想要抽象出声明的返回值类型，就必须要考虑 <code>existential</code> 或者 <code>type erasure</code>。</p>
+<p>基于这一点，Swift 5.1 中引入了 <a href="https://github.com/apple/swift-evolution/blob/master/proposals/0244-opaque-result-types.md" target="_blank" rel="noopener">SE-0244 opaque result types</a> 这一特性。<code>some Protocol</code> 表示一个确定的实现了 <code>Protocol</code> 协议的类型。同时它还有一个要求，就是 <code>some</code> 修饰 return type 的时候，要求所有的 return 语句返回相同的具体类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">P</span> </span>&#123; &#125;</span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Int</span> : <span class="title">P</span> </span>&#123; &#125;</span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">String</span> : <span class="title">P</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">foo</span><span class="params">(flip: Bool)</span></span> -&gt; some <span class="type">P</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> flip &#123; <span class="keyword">return</span> <span class="number">17</span> &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">"a string"</span> <span class="comment">// error: different return types Int and String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在一个支持范型的语言中，想使用 <code>PAT</code> 又不需要指定具体的类型对于编写简洁代码非常重要。考虑一下嵌套的范型，如 SwiftUI 中那些 View 的 body 的真实类型。</p>
+<blockquote>
+<p>当然，<code>some</code> 只是在编写代码的时候帮助我们进行了简化，类型信息依然存在，<code>SwiftUI</code> 非常依赖这些信息进行 View 的更新。</p>
+</blockquote>
+<h2 id="any-Protocol"><a href="#any-Protocol" class="headerlink" title="any Protocol"></a>any Protocol</h2><p>Swift 中想要把一个 <code>Protocol</code> 作为一个类型来用，要求这个 <code>Protocol</code> 必须不能是 <code>PAT</code>，否则的话就会报错 <code>Protocol can only be used as generic constraint because it has Self or associated type requirements</code>。为了缓解这个问题，Swift 引入了 <a href="https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md" target="_blank" rel="noopener">SE-0309 unlock existential types for all protocols</a>，compiler 帮忙自动的进行 <code>type erasure</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Logging</span>: <span class="title">Hashtable</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// before</span></span><br><span class="line"><span class="comment">// -func add(_ logger: AnyLogger) &#123;</span></span><br><span class="line"><span class="comment">// after, 🙂️ OK</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">add</span><span class="params">(<span class="number">_</span> logger: Logging)</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到这里，<code>PAT</code> 的使用成本大大的降低，实用性大大提升。终于可以像使用范型那样的使用 <code>PAT</code> 了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">add</span><span class="params">(<span class="number">_</span> logger: Logging)</span></span> &#123; ... &#125; <span class="comment">// existential type</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">add</span>&lt;T: Logging&gt;<span class="params">(<span class="number">_</span> logger: T)</span></span> &#123; ... &#125; <span class="comment">// generic type</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> logger: <span class="type">MemoryLogger</span></span><br><span class="line">add(logger)</span><br></pre></td></tr></table></figure>
+<p>但是 <code>generic type</code> 和 <code>existential type</code> 始终是不同的东西，前者是 <code>type-level abstraction</code> 而后者是 <code>value-level abstraction</code>，前者强调的是类型以及类型之间的关系，后者关心的是值，类型信息被 compiler 帮忙抹除掉。</p>
+<p>为了从语法上区分开两者，Swift 又引入了 <a href="https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md" target="_blank" rel="noopener">SE-0335 existential any</a>，<code>existential type</code> 必须通过 <code>any</code> 关键词进行显式声明 。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> logger: <span class="type">Logging</span> = <span class="type">MemoryLogger</span>() <span class="comment">// before</span></span><br><span class="line"><span class="keyword">let</span> logger: any <span class="type">Logging</span> = <span class="type">MemoryLogger</span>() <span class="comment">// after</span></span><br></pre></td></tr></table></figure>
+<p>至此，终于可以一致的对待 Swift 中的所有 protocol 了，而不需要区别它是不是 PAT。</p>
+<h2 id="Type-level-and-value-level-abstraction"><a href="#Type-level-and-value-level-abstraction" class="headerlink" title="Type-level and value-level abstraction"></a>Type-level and value-level abstraction</h2><p>要深入了解 <code>some</code> 和 <code>any</code>，还是要先了解什么是 <code>type-level abstraction</code> 和 <code>value-level abstraction</code> 。</p>
+<h3 id="Type-level-abstraction"><a href="#Type-level-abstraction" class="headerlink" title="Type-level abstraction"></a>Type-level abstraction</h3><p>Generics（范型）提供了类型层面上的抽象，范型允许函数或者类型与符合给定约束集的任何类型统一使用，同时保留了在任何特定实例中使用的特定类型的标识。泛型函数引入了代表特定类型的类型变量（type variables，感觉更多时候被叫做类型参数？）。 这允许函数声明它接受任何符合协议的值。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">foo</span>&lt;T: Collection&gt;<span class="params">(x: T)</span></span> &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>类型变量 <code>T</code> 在类型层面上抽象出特定的 <code>Collection</code> 类型。具体的类型标识仍然保留着，因此类型系统可以保留不同值之间的类型关系。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bar</span>&lt;T: Collection&gt;<span class="params">(x: T, y: T)</span></span> -&gt; [<span class="type">T</span>] &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Value-level-abstraction"><a href="#Value-level-abstraction" class="headerlink" title="Value-level abstraction"></a>Value-level abstraction</h3><p>Existential 类型提供了值层面上的抽象。与绑定一些符合约束的现有类型的泛型类型参数相比，existential 类型是一种不同的类型，它可以保存符合一组约束的任何类型的任何值，在值层面上抽象底层的具体类型。Existentials 允许不同的具体类型的值作为相同的存在类型的值互换使用，在值层面上抽象了底层符合类型之间的差异。同一个 existential 类型的不同实例可以持有完全不同的底层类型的值，并且改变一个 existential 类型可以改变该值所持有的底层类型。</p>
+<h3 id="Type-level-abstraction-is-missing-for-function-returns"><a href="#Type-level-abstraction-is-missing-for-function-returns" class="headerlink" title="Type-level abstraction is missing for function returns"></a>Type-level abstraction is missing for function returns</h3><p>泛型是 Swift 在函数接口中进行类型层面的抽象的工具，但它们的工作方式基本上在调用者的控制之下，也就是说具体类型由调用方来决定。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">zim</span>&lt;T: P&gt;<span class="params">()</span></span> -&gt; <span class="type">T</span> &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>对于 <code>zim</code> 这个范型函数，具体返回的类型 <code>T</code>，是由调用方来决定，实现方（callee）只声明了它必须要满足 <code>P</code> 约束。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x: <span class="type">Int</span> = zim() <span class="comment">// T == Int chosen by caller</span></span><br><span class="line"><span class="keyword">let</span> y: <span class="type">String</span> = zim() <span class="comment">// T == String chosen by caller</span></span><br></pre></td></tr></table></figure>
+<h3 id="“Reverse-generics”-for-return-type-abstraction"><a href="#“Reverse-generics”-for-return-type-abstraction" class="headerlink" title="“Reverse generics” for return type abstraction"></a>“Reverse generics” for return type abstraction</h3><p>但有时候，实现方真正希望的 <code>zim</code> 函数是它返回一个 <code>P</code> 类型，但具体是 <code>Int</code> 还是 <code>String</code> 由实现方来决定。这点与普通的范型刚刚相反，可以认为是反向的范型（<code>reverse generics</code>）。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">zim</span><span class="params">()</span></span> -&gt; <span class="type">P</span> &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>此时的 <code>P</code> 不再是用来作为范型约束，<code>zim</code> 函数返回的值是一个 existential。 </p>
+<h3 id="Expressing-constraints-directly-on-arguments-and-returns"><a href="#Expressing-constraints-directly-on-arguments-and-returns" class="headerlink" title="Expressing constraints directly on arguments and returns"></a>Expressing constraints directly on arguments and returns</h3><p>为了完善 Swift 的类型抽象系统，提出了使用 <code>some</code> 这个修饰符来对参数和返回值表达约束，而不需要使用 <code>existential</code> 类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">concatenate</span><span class="params">(a: some Collection, b: some Collection)</span></span> -&gt; some <span class="type">Collection</span> &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>甚至可以使用 <code>where</code> 来表达它们直接的类型关系。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">concatenate</span><span class="params">(a: some Collection, b: some Collection)</span></span> -&gt; some <span class="type">Collection</span></span><br><span class="line">  <span class="keyword">where</span> type(of: a).<span class="type">Element</span> == type(of: b).<span class="type">Element</span>,</span><br><span class="line">        type(of: <span class="keyword">return</span>).<span class="type">Element</span> == type(of: b).<span class="type">Element</span></span><br></pre></td></tr></table></figure>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><ul>
+<li><code>some</code> 是另一种特殊的 <code>generic</code>（符合要求的未知但具体的类型）。它的目的是用来对复杂的类型进行抽象，类型的信息不会被擦除。</li>
+<li><code>any</code> 其实是显式的声明 <code>existential</code>。它的目的是用来对值进行抽象，类型信息会被 compiler 擦除。</li>
+</ul>
+<p><code>some</code> 和 <code>any</code> 是对偶的（<code>duals</code>）两个修饰词，它们都解决了 <code>PAT</code> 所带来的一些不方便的问题。目前 Swift 只支持使用 <code>some</code> 来修饰返回值，而 <code>any</code> 的使用场景则比较多。</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a href="https://github.com/apple/swift-evolution/blob/master/proposals/0244-opaque-result-types.md" target="_blank" rel="noopener">swift-evolution/0244-opaque-result-types.md at master · apple/swift-evolution · GitHub</a><br><a href="https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md" target="_blank" rel="noopener">swift-evolution/0309-unlock-existential-types-for-all-protocols.md at main · apple/swift-evolution · GitHub</a><br><a href="https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md" target="_blank" rel="noopener">swift-evolution/0335-existential-any.md at main · apple/swift-evolution · GitHub</a><br><a href="https://forums.swift.org/t/improving-the-ui-of-generics/22814#heading--clarifying-existentials" target="_blank" rel="noopener">Improving the UI of generics - Discussion - Swift Forums</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+            <a href="/tags/existential/" rel="tag"># existential</a>
+          
+            <a href="/tags/protocol/" rel="tag"># protocol</a>
+          
+            <a href="/tags/generic/" rel="tag"># generic</a>
+          
+            <a href="/tags/pats/" rel="tag"># pats</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/05/existential/" rel="next" title="∃ Existential">
+                <i class="fa fa-chevron-left"></i> ∃ Existential
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/07/16/silgen-name/" rel="prev" title="silgen name">
+                silgen name <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Xspyhack">
+          <p class="site-author-name" itemprop="name">Xspyhack</p>
+           
+              <p class="site-description motion-element" itemprop="description">Why join the navy if you can be a pirate?</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TL-DR"><span class="nav-number">1.</span> <span class="nav-text">TL;DR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#some-Protocol"><span class="nav-number">2.</span> <span class="nav-text">some Protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#any-Protocol"><span class="nav-number">3.</span> <span class="nav-text">any Protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Type-level-and-value-level-abstraction"><span class="nav-number">4.</span> <span class="nav-text">Type-level and value-level abstraction</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-level-abstraction"><span class="nav-number">4.1.</span> <span class="nav-text">Type-level abstraction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Value-level-abstraction"><span class="nav-number">4.2.</span> <span class="nav-text">Value-level abstraction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-level-abstraction-is-missing-for-function-returns"><span class="nav-number">4.3.</span> <span class="nav-text">Type-level abstraction is missing for function returns</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#“Reverse-generics”-for-return-type-abstraction"><span class="nav-number">4.4.</span> <span class="nav-text">“Reverse generics” for return type abstraction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Expressing-constraints-directly-on-arguments-and-returns"><span class="nav-number">4.5.</span> <span class="nav-text">Expressing constraints directly on arguments and returns</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">5.</span> <span class="nav-text">Conclusion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">6.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xspyhack</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

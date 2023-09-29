@@ -1,0 +1,801 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="swift,protocol,generic,pats,type erasure,type erased,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="更新：随着 Swift 中一些新的提案（如 SE-0309 和 SE-0335）的提出，大大的简化了 Swift 中的 Protocol 的使用，文中的一些概念或者观点抑或是写法已经显得落后而不适用。–2022.01.01   很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Or">
+<meta name="keywords" content="swift,protocol,generic,pats,type erasure,type erased">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PATs">
+<meta property="og:url" content="https://blessingsoft.com/2018/08/26/pats/index.html">
+<meta property="og:site_name" content="Cherry Blessing">
+<meta property="og:description" content="更新：随着 Swift 中一些新的提案（如 SE-0309 和 SE-0335）的提出，大大的简化了 Swift 中的 Protocol 的使用，文中的一些概念或者观点抑或是写法已经显得落后而不适用。–2022.01.01   很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Or">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2023-09-29T09:25:51.988Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PATs">
+<meta name="twitter:description" content="更新：随着 Swift 中一些新的提案（如 SE-0309 和 SE-0335）的提出，大大的简化了 Swift 中的 Protocol 的使用，文中的一些概念或者观点抑或是写法已经显得落后而不适用。–2022.01.01   很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types  Protocol-Or">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blessingsoft.com/2018/08/26/pats/">
+
+
+
+
+
+  <title>PATs | Cherry Blessing</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cherry Blessing</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">A monad is a monoid in the category of endofunctors</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blessingsoft.com/2018/08/26/pats/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xspyhack">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cherry Blessing">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PATs</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-26T20:00:00+08:00">
+                2018-08-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/advanced-swift/" itemprop="url" rel="index">
+                    <span itemprop="name">advanced swift</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>更新：随着 Swift 中一些新的提案（如 <a href="https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md" target="_blank" rel="noopener">SE-0309</a> 和 <a href="https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md" target="_blank" rel="noopener">SE-0335</a>）的提出，大大的简化了 Swift 中的 Protocol 的使用，文中的一些概念或者观点抑或是写法已经显得落后而不适用。–2022.01.01</p>
+</blockquote>
+<blockquote>
+<p>很久没有写 Swift 了，闲着写几行玩玩的时候，遇到了一个之前没有接触过的问题——Protocol with Associated Types</p>
+</blockquote>
+<h2 id="Protocol-Oriented-Programming"><a href="#Protocol-Oriented-Programming" class="headerlink" title="Protocol-Oriented Programming"></a>Protocol-Oriented Programming</h2><p>首先 Swift 是一个 <strong>支持</strong> 面向协议编程思想的语言，并且 <a href="https://github.com/apple/swift" target="_blank" rel="noopener">Standard Library</a> 也是大量使用这种思想来实现很多的特性。（这里删掉介绍 POP 以及对应优缺点的几千字</p>
+<p>先看看用 POP 的思想，来实现一个 Cache：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MemoryCache</span>: <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Memory Cache"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DiskCache</span>: <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Disk Cache"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> memory: <span class="type">Caching</span> = <span class="type">MemoryCache</span>() <span class="comment">// 🙂️</span></span><br><span class="line"><span class="keyword">let</span> disk: <span class="type">Caching</span> = <span class="type">DiskCache</span>() <span class="comment">// 🙂️</span></span><br><span class="line"><span class="keyword">let</span> caches: [<span class="type">Caching</span>] = [memory, disk] <span class="comment">// 🙂️</span></span><br></pre></td></tr></table></figure>
+<p>到这里，一切都是很熟悉的样子，也能正常的 work，类似这样的<strong>用一个 <em>protocol</em> 来进行接口（行为）约束</strong>的代码估计写的也不少。</p>
+<h2 id="Generics"><a href="#Generics" class="headerlink" title="Generics"></a>Generics</h2><blockquote>
+<p>作为一个现代语言，泛型是必须支持的。作为一个现代程序员，泛型也是必须会使用的。</p>
+</blockquote>
+<p>Cache  是用来缓存数据的，但有很多数据类型都适合被缓存，比如一张图片，一个视频等等。如果希望不同类型的数据有不同的缓存策略，使用的时候也能直接获取某一种类型的缓存，不需要各种 <code>as? XXX</code>，立马想到的就是泛型。</p>
+<p>泛型还不简单：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Object</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MemoryCache</span>: <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Object</span> = <span class="type">UIImage</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span> &#123;</span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object?</span> &#123;</span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DiskCache</span>: <span class="title">Caching</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Object</span> = <span class="type">UIImage</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">store</span><span class="params">(<span class="number">_</span> object: Object, forKey key: String)</span></span> &#123;</span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">retrieve</span><span class="params">(forKey key: String)</span></span> -&gt; <span class="type">Object?</span> &#123;</span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> memory: <span class="type">Caching</span> = <span class="type">MemoryCache</span>() <span class="comment">// 🙃</span></span><br><span class="line"><span class="keyword">let</span> disk: <span class="type">Caching</span> = <span class="type">DiskCache</span>() <span class="comment">// 🙃</span></span><br><span class="line"><span class="keyword">let</span> caches: [<span class="type">Caching</span>] = [memory, disk] <span class="comment">// 🙃</span></span><br></pre></td></tr></table></figure>
+<p>然后 Xcode 就好很无情的提示你：</p>
+<blockquote>
+<p>❗️Protocol ‘Caching’ can only be used as generic constraint because it has Self or associated type requirements</p>
+</blockquote>
+<p>WTF?</p>
+<h2 id="What-is-Protocol-with-Associated-Types"><a href="#What-is-Protocol-with-Associated-Types" class="headerlink" title="What is Protocol with Associated Types?"></a>What is Protocol with Associated Types?</h2><p>看到这个错误提示，有经验的 Swift  程序员一般会想到，<code>Caching</code> 里面关联了一个类型，如果不指定这个关联的类型的具体类型是什么，作为一门静态语言，那可能就无法知道内存是怎么布局的。</p>
+<p>既然需要指定类型，马上想到的就是 <em>泛型参数</em>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> cache: <span class="type">Caching</span>&lt;<span class="type">UIImage</span>&gt; =  ...</span><br><span class="line"><span class="comment">// ❗️Protocol 'Caching' can only be used as generic constraint because it has Self or associated type requirements</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Caching</span>&lt;<span class="title">Object</span>&gt; </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ❗️Protocols do not allow generic parameters; use associated types instead</span></span><br></pre></td></tr></table></figure>
+<p>WTF？</p>
+<h2 id="Protocol-as-Types"><a href="#Protocol-as-Types" class="headerlink" title="Protocol as Types"></a>Protocol as Types</h2><p>突然发现自己好像一点都不了解 protocol，看看文档介绍<a href="https://docs.swift.org/swift-book/LanguageGuide/Protocols.html" target="_blank" rel="noopener">Protocols — The Swift Programming Language (Swift 4.2)</a>。里面 Protocol as Types 一节有一段话：</p>
+<blockquote>
+<p>Protocols don’t actually implement any functionality themselves. Nonetheless, any protocol you create will become a fully-fledged type for use in your code.<br>Because it’s a type, you can use a protocol in many places where other types are allowed, including:</p>
+<ul>
+<li>As a parameter type or return type in a function, method, or initializer</li>
+<li>As the type of a constant, variable, or property</li>
+<li>As the type of items in an array, dictionary, or other container</li>
+</ul>
+</blockquote>
+<p>为什么 protocol + generic 就这么难用？应该怎么用？</p>
+<h2 id="PATs-in-Swift-Standard-Library"><a href="#PATs-in-Swift-Standard-Library" class="headerlink" title="PATs in Swift Standard Library"></a>PATs in Swift Standard Library</h2><p>既然不会用，那么看看 Standard Library 里面是如何使用的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">IteratorProtocol</span> </span>&#123;</span><br><span class="line">    <span class="comment">/// The type of element traversed by the iterator.</span></span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Element</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// - Returns: The next element in the underlying sequence, if a next element</span></span><br><span class="line">    <span class="comment">///   exists; otherwise, `nil`.</span></span><br><span class="line">    <span class="keyword">mutating</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">Sequence</span> </span>&#123;</span><br><span class="line">    <span class="comment">/// A type representing the sequence's elements.</span></span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Element</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// A type that provides the sequence's iteration interface and</span></span><br><span class="line">    <span class="comment">/// encapsulates its iteration state.</span></span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Iterator</span> : <span class="type">IteratorProtocol</span> <span class="keyword">where</span> <span class="type">Iterator</span>.<span class="type">Element</span> == <span class="type">Element</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Returns an iterator over the elements of this sequence.</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">makeIterator</span><span class="params">()</span></span> -&gt; <span class="type">Iterator</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后又发现有一个叫 <code>AnyIterator</code> 和 <code>AnySequence</code> 的东西。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnyIterator</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> base: <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _IteratorBox(base)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="number">_</span> body: @escaping () -&gt; <span class="type">Element?</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _IteratorBox(_ClosureBasedIterator(body))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;) &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _box</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">AnyIterator</span>: <span class="title">IteratorProtocol</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element?</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> _box.next()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnySequence</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnySequenceBox&lt;<span class="type">Element</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> makeUnderlyingIterator: @escaping () -&gt; <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(_ClosureBasedSequence(makeUnderlyingIterator))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnySequenceBox&lt;<span class="type">Element</span>&gt;) &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _box</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">AnySequence</span>: <span class="title">Sequence</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">typealias</span> <span class="type">Iterator</span> = <span class="type">AnyIterator</span>&lt;<span class="type">Element</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">S</span> : <span class="type">Sequence</span>&gt;(<span class="number">_</span> base: <span class="type">S</span>) <span class="keyword">where</span> <span class="type">S</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _SequenceBox(_base: base)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是什么鬼，先看看文档：</p>
+<blockquote>
+<p>This iterator forwards its next() method to an arbitrary underlying iterator having the same Element type, hiding the specifics of the underlying IteratorProtocol. —<a href="https://developer.apple.com/documentation/swift/anyiterator" target="_blank" rel="noopener">AnyIterator - Swift Standard Library | Apple Developer Documentation</a></p>
+</blockquote>
+<blockquote>
+<p>An instance of AnySequence forwards its operations to an underlying base sequence having the same Element type, hiding the specifics of the underlying sequence. —<a href="https://developer.apple.com/documentation/swift/anysequence" target="_blank" rel="noopener">AnySequence - Swift Standard Library | Apple Developer Documentation</a></p>
+</blockquote>
+<p>说白了就是包装一层，转发一下，它有个术语叫做 <strong>Type Erasure</strong></p>
+<h2 id="What-is-Type-Erasure"><a href="#What-is-Type-Erasure" class="headerlink" title="What is Type Erasure?"></a>What is Type Erasure?</h2><p>首先 Swift 的类型系统里面，有两种类型：</p>
+<ul>
+<li>Concrete Type: Int, Bool…</li>
+<li>Abstract Type: associatedType, <t></t></li>
+</ul>
+<p>对于抽象类型来说，编译器无法知道这个类型的确切功能。当编译器处理抽象类型的时候，它无法知晓其所占的空间大小；甚至可能会认为这个类型是不存在的。Swift 是静态语言。</p>
+<blockquote>
+<p>Type erasure is a process in code that makes abstract types concrete.</p>
+</blockquote>
+<p>具体看看 Swift Standard Library 里面，是怎么做到的：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. abstract base</span></span><br><span class="line"><span class="keyword">internal</span> <span class="class"><span class="keyword">class</span> <span class="title">_AnyIteratorBoxBase</span>&lt;<span class="title">Element</span>&gt; : <span class="title">IteratorProtocol</span> </span>&#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>() &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Element?</span> &#123; _abstract() &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. private box</span></span><br><span class="line"><span class="keyword">internal</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">_IteratorBox</span>&lt;<span class="title">Base</span> : <span class="title">IteratorProtocol</span>&gt; : <span class="title">_AnyIteratorBoxBase</span>&lt;<span class="title">Base</span>.<span class="title">Element</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(<span class="number">_</span> base: <span class="type">Base</span>) &#123; <span class="keyword">self</span>._base = base &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">override</span> <span class="function"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">Base</span>.<span class="type">Element?</span> &#123; <span class="keyword">return</span> _base.next() &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">var</span> _base: <span class="type">Base</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. public wrapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">AnyIterator</span>&lt;<span class="title">Element</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">let</span> _box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>&lt;<span class="type">I</span> : <span class="type">IteratorProtocol</span>&gt;(<span class="number">_</span> base: <span class="type">I</span>) <span class="keyword">where</span> <span class="type">I</span>.<span class="type">Element</span> == <span class="type">Element</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _IteratorBox(base)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="number">_</span> body: @escaping () -&gt; <span class="type">Element?</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _IteratorBox(_ClosureBasedIterator(body))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">init</span>(_box: _AnyIteratorBoxBase&lt;<span class="type">Element</span>&gt;) &#123;</span><br><span class="line">        <span class="keyword">self</span>._box = _box</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个模式概括起来就是三个步骤：</p>
+<ul>
+<li>an abstract base class</li>
+<li>a private box class</li>
+<li>a public wrapper class</li>
+</ul>
+<p>（想了解更多相关的理论知识？<em>Existential</em> 了解一下</p>
+<h2 id="One-more-thing"><a href="#One-more-thing" class="headerlink" title="One more thing"></a>One more thing</h2><p>到这里，我以为我已经掌握了如何用 PATs 了，然后有一天，我开始写一个轻量级的日志系统。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Logging</span>: <span class="title">Hashtable</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> loggers: <span class="type">Set</span>&lt;<span class="type">Logging</span>&gt; = []</span><br><span class="line"><span class="comment">// ❗️Using 'Logging' as a concrete type conforming to protocol 'Hashable' is no supported</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">add</span><span class="params">(<span class="number">_</span> logger: Logging)</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ❗️Protocol 'Logging' can only be used as generic constraint because it has Self or associated type requirements</span></span><br></pre></td></tr></table></figure>
+<p>看到这熟悉的错误，马上就想到 <code>Hashable</code> 其实是继承 <code>Equatable</code> 的，然后这个 <code>Equatable</code> 的几个方法里面，用了 <code>Self</code> 来占位，它其实也是 PATs 的一种。意不意外，惊不惊喜。（其实一点都不意外</p>
+<p>然后就是 type erasure 了，真正根据上面的三个步骤来写的时候，发现好像跟之前的又有点不太一样，因为它没有关联别的类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. abstract baes</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_AnyLoggerBoxBase</span>&lt;<span class="title">T</span>&gt; : <span class="title">Logging</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. private box</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_LoggerBox</span>&lt;<span class="title">Base</span> : <span class="title">Logging</span>&gt; : <span class="title">_AnyLoggerBoxBase</span> &lt;<span class="title">Base</span>.<span class="title">Self</span>&gt; </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. public wrapper</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">AnyLogger</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">init</span>&lt;<span class="type">L</span> : <span class="type">Logging</span>&gt;(<span class="number">_</span> base: <span class="type">L</span>) <span class="keyword">where</span> <span class="type">L</span>.<span class="type">Self</span> == <span class="type">Self</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这三步里面的泛型参数像是多出来的，根本无从下手。</p>
+<blockquote>
+<p>遇到不懂，首先看源码总是不会有错。— 圣人</p>
+</blockquote>
+<p>了解 Swift 的都知道，有一个叫做 <code>AnyHashable</code> 的东西。（一顿抄，完事</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><ul>
+<li><a href="https://www.youtube.com/watch?v=XWoNjiSPqI8&amp;t=2391s" target="_blank" rel="noopener">Alexis Gallagher - Protocols with Associated Types - YouTube</a></li>
+<li><a href="https://academy.realm.io/posts/tryswift-gwendolyn-weston-type-erasure/" target="_blank" rel="noopener">Keep Calm and Type Erase On</a></li>
+<li><a href="https://developer.apple.com/documentation/swift/anysequence" target="_blank" rel="noopener">AnySequence - Swift Standard Library | Apple Developer Documentation</a></li>
+<li><a href="https://github.com/apple/swift/blob/master/stdlib/public/core/ExistentialCollection.swift.gyb" target="_blank" rel="noopener">swift/ExistentialCollection.swift.gyb at master · apple/swift · GitHub</a></li>
+<li><a href="https://github.com/apple/swift/blob/master/stdlib/public/core/AnyHashable.swift" target="_blank" rel="noopener">swift/AnyHashable.swift at master · apple/swift · GitHub</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/swift/" rel="tag"># swift</a>
+          
+            <a href="/tags/protocol/" rel="tag"># protocol</a>
+          
+            <a href="/tags/generic/" rel="tag"># generic</a>
+          
+            <a href="/tags/pats/" rel="tag"># pats</a>
+          
+            <a href="/tags/type-erasure/" rel="tag"># type erasure</a>
+          
+            <a href="/tags/type-erased/" rel="tag"># type erased</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/10/plist-parser/" rel="next" title="Plist Parser">
+                <i class="fa fa-chevron-left"></i> Plist Parser
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/26/logging-system/" rel="prev" title="How to design a lightweight Logging System">
+                How to design a lightweight Logging System <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Xspyhack">
+          <p class="site-author-name" itemprop="name">Xspyhack</p>
+           
+              <p class="site-description motion-element" itemprop="description">Why join the navy if you can be a pirate?</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol-Oriented-Programming"><span class="nav-number">1.</span> <span class="nav-text">Protocol-Oriented Programming</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Generics"><span class="nav-number">2.</span> <span class="nav-text">Generics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Protocol-with-Associated-Types"><span class="nav-number">3.</span> <span class="nav-text">What is Protocol with Associated Types?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Protocol-as-Types"><span class="nav-number">4.</span> <span class="nav-text">Protocol as Types</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PATs-in-Swift-Standard-Library"><span class="nav-number">5.</span> <span class="nav-text">PATs in Swift Standard Library</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Type-Erasure"><span class="nav-number">6.</span> <span class="nav-text">What is Type Erasure?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#One-more-thing"><span class="nav-number">7.</span> <span class="nav-text">One more thing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ref"><span class="nav-number">8.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xspyhack</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
