@@ -26,6 +26,7 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
+  - "apps/**"          # 跳过 apps 目录下所有文件（支持多个 app）
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -71,4 +72,4 @@ theme: next
 deploy:
   type: git
   repository: git@github.com:xspyhack/xspyhack.github.io.git
-  # branch: master
+  branch: master
