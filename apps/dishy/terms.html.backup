@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户条款 - Cherry Blessing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .meta {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .nav {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>用户服务条款</h1>
+            <p class="meta">最后更新时间：2025年12月6日</p>
+
+            <h2>1. 服务条款的接受</h2>
+            <p>欢迎使用我们的服务。在使用本服务之前，请您仔细阅读本条款。您使用本服务即表示您同意接受本条款的全部内容。</p>
+
+            <h2>2. 服务说明</h2>
+            <p>本服务是一款[应用类型说明]，为用户提供[主要功能说明]。</p>
+
+            <h2>3. 用户账号</h2>
+            <p>您需要创建账号才能使用本服务的某些功能。您有责任维护账号的机密性，并对账号下的所有活动负责。</p>
+
+            <h2>4. 隐私保护</h2>
+            <p>我们重视您的隐私保护。详细信息请参阅我们的<a href="/privacy.html">隐私政策</a>。</p>
+
+            <h2>5. 知识产权</h2>
+            <p>本服务的所有内容，包括但不限于文字、图片、音频、视频等，均受版权法保护。</p>
+
+            <h2>6. 免责声明</h2>
+            <p>本服务按"现状"提供，不提供任何明示或暗示的保证。</p>
+
+            <h2>7. 条款的修改</h2>
+            <p>我们保留随时修改本条款的权利。修改后的条款将在本页面公布。</p>
+
+            <h2>8. 联系我们</h2>
+            <p>如有任何问题，请通过以下方式联系我们：[联系邮箱]</p>
+
+            <div class="nav">
+                <a href="index.html">返回 Foodii</a>
+                <a href="privacy.html">隐私政策</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

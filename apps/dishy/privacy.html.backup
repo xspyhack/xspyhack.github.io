@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私政策 - Cherry Blessing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .meta {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .nav {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>隐私政策</h1>
+            <p class="meta">最后更新时间：2025年12月6日</p>
+
+            <h2>1. 引言</h2>
+            <p>我们非常重视您的隐私保护。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。</p>
+
+            <h2>2. 我们收集的信息</h2>
+            <p>我们可能收集以下类型的信息：</p>
+            <ul>
+                <li>账户信息：用户名、邮箱地址等</li>
+                <li>使用信息：应用使用记录、访问日志等</li>
+                <li>设备信息：设备型号、操作系统版本等</li>
+            </ul>
+
+            <h2>3. 信息的使用</h2>
+            <p>我们使用收集的信息用于：</p>
+            <ul>
+                <li>提供和改进我们的服务</li>
+                <li>处理您的请求和交易</li>
+                <li>发送服务通知和更新</li>
+                <li>保护服务安全，防止欺诈</li>
+            </ul>
+
+            <h2>4. 信息的共享</h2>
+            <p>我们不会向第三方出售您的个人信息。在以下情况下，我们可能会共享您的信息：</p>
+            <ul>
+                <li>获得您的明确同意</li>
+                <li>遵守法律法规要求</li>
+                <li>保护用户和公众的权利、财产或安全</li>
+            </ul>
+
+            <h2>5. 信息安全</h2>
+            <p>我们采取合理的安全措施保护您的个人信息，防止未经授权的访问、使用或泄露。</p>
+
+            <h2>6. 您的权利</h2>
+            <p>您有权访问、更正、删除您的个人信息，或撤回您的同意。</p>
+
+            <h2>7. Cookie 的使用</h2>
+            <p>我们使用 Cookie 和类似技术来改善用户体验。您可以通过浏览器设置管理 Cookie。</p>
+
+            <h2>8. 隐私政策的变更</h2>
+            <p>我们可能会不时更新本隐私政策。重大变更将通过应用内通知或邮件通知您。</p>
+
+            <h2>9. 联系我们</h2>
+            <p>如对本隐私政策有任何疑问，请通过以下方式联系我们：[联系邮箱]</p>
+
+            <div class="nav">
+                <a href="index.html">返回 Foodii</a>
+                <a href="terms.html">用户协议</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
