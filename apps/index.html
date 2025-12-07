@@ -13,120 +13,157 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            background: #000;
+            color: #f5f5f7;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px;
         }
 
         header {
             text-align: center;
-            padding: 60px 20px;
-            color: white;
+            padding: 100px 20px 60px;
         }
 
         header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #f5f5f7 0%, #a1a1a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.25rem;
+            color: #a1a1a6;
+            font-weight: 400;
         }
 
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            padding: 40px 0;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            padding: 60px 0 100px;
         }
 
         .app-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 48px 36px;
             text-decoration: none;
-            color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .app-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
         }
 
         .app-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 18px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 96px;
+            height: 96px;
+            border-radius: 22px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s;
+        }
+
+        .app-card:hover .app-icon {
+            transform: scale(1.05);
         }
 
         .app-card h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            color: #f5f5f7;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
         }
 
         .app-description {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .app-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .status-live {
-            background: #e3f9e5;
-            color: #09825d;
-        }
-
-        .status-development {
-            background: #fff3cd;
-            color: #856404;
+            color: #a1a1a6;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+            font-weight: 400;
         }
 
         footer {
             text-align: center;
-            padding: 40px 20px;
-            color: white;
+            padding: 60px 20px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         footer a {
-            color: white;
+            color: #a1a1a6;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            transition: border-color 0.3s;
+            font-size: 0.875rem;
+            transition: color 0.3s;
         }
 
         footer a:hover {
-            border-color: white;
+            color: #f5f5f7;
         }
 
         @media (max-width: 768px) {
+            header {
+                padding: 60px 20px 40px;
+            }
+
             header h1 {
-                font-size: 2rem;
+                font-size: 2.5rem;
+            }
+
+            header p {
+                font-size: 1.125rem;
             }
 
             .apps-grid {
                 grid-template-columns: 1fr;
+                padding: 40px 0 60px;
+            }
+
+            .app-card {
+                padding: 40px 28px;
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background: #000;
             }
         }
     </style>
@@ -135,16 +172,15 @@
     <div class="container">
         <header>
             <h1>我的应用</h1>
-            <p>探索我开发的应用作品</p>
+            <p>探索精心打造的应用作品</p>
         </header>
 
         <div class="apps-grid">
-            <!-- Foodii -->
+            <!-- 食记 -->
             <a href="/apps/dishy/" class="app-card">
-                <img src="dishy/assets/app-icon.png" alt="Foodii" class="app-icon">
-                <h2>Foodii</h2>
-                <p class="app-description">你的 AI 食谱。每解锁一道新菜，就拍下来记录，看着会做的菜越来越多。</p>
-                <span class="app-status status-live">已上线</span>
+                <img src="dishy/assets/app-icon.png" alt="食记" class="app-icon">
+                <h2>食记</h2>
+                <p class="app-description">你的 AI 美食管家</p>
             </a>
 
             <!-- 添加更多应用时，复制 app-template 目录并修改内容 -->
