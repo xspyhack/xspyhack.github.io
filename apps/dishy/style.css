@@ -39,6 +39,9 @@ main {
         0 8px 16px rgba(0, 0, 0, 0.06),
         0 2px 4px rgba(0, 0, 0, 0.04);
     transition: transform 0.3s ease;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .app-icon:hover {
